@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>あいうえお：二文字ひらがなクイズ</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="main.js" defer></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>あいうえお：二文字ひらがなクイズ</h1>
+    </header>
+    <main class="app-main">
+      <section class="prompt" aria-labelledby="prompt-title">
+        <h2 id="prompt-title" class="sr-only">出題</h2>
+        <div class="word-display" id="word-display" aria-live="polite">？？</div>
+        <figure class="illustration">
+          <img src="assets/placeholder.svg" alt="ことばの仮イラスト" id="word-illustration" />
+          <figcaption id="illustration-caption">カードをえらんで正解を確認しましょう</figcaption>
+        </figure>
+        <p class="result" id="result-text" role="status" aria-live="polite"></p>
+      </section>
+      <section class="choices" aria-labelledby="choices-title">
+        <h2 id="choices-title">ことばをえらぶ</h2>
+        <div class="card-grid" id="card-grid" role="list"></div>
+      </section>
+    </main>
+    <footer class="app-footer">
+      <div class="footer-controls">
+        <button
+          type="button"
+          id="new-problem-btn"
+          class="accent-btn"
+          aria-label="次のもんだい"
+        >
+          次のもんだい
+        </button>
+        <div class="speech-area">
+          <button
+            type="button"
+            id="speak-btn"
+            class="speak-btn"
+            aria-label="選択中のことばを読み上げる"
+          >
+            🔊よむ
+          </button>
+          <p class="speech-notice" id="speech-notice" role="status" aria-live="polite" hidden>
+            音声は未対応です
+          </p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
