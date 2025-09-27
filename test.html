@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>テスト：buildChoiceSet</title>
+    <script src="main.js" defer></script>
+  </head>
+  <body>
+    <h1>テストページ</h1>
+    <p>DevTools の Console を開き、Assertion failed が表示されないことを確認してください。</p>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        const { buildChoiceSet, WORDS } = window.__aiueo__ || {};
+        if (typeof buildChoiceSet !== 'function' || !Array.isArray(WORDS)) {
+          console.error('テスト実行に必要な関数が見つかりません');
+          return;
+        }
+
+        const TEST_RUNS = 10;
+        for (let i = 0; i < TEST_RUNS; i += 1) {
+          const currentWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+          const choices = buildChoiceSet(currentWord, WORDS);
+
+          console.assert(Array.isArray(choices), 'choices は配列である必要があります');
+          console.assert(
+            choices.length === 5,
+            '選択肢は常に5件である必要があります',
+          );
+          console.assert(
+            choices.includes(currentWord),
+            '選択肢には必ず正解が含まれている必要があります',
+          );
+          const uniqueChoices = new Set(choices);
+          console.assert(
+            uniqueChoices.size === choices.length,
+            '選択肢には重複があってはいけません',
+          );
+        }
+
+        console.log('All assertions passed.');
+      });
+    </script>
+  </body>
+</html>
