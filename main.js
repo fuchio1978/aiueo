@@ -30,9 +30,24 @@ const PLACEHOLDER_IMAGE = {
 const WORD_IMAGE_MAP = {
   ねこ: 'neko',
   いぬ: 'inu',
+  くま: 'kuma',
+  さる: 'saru',
   かに: 'kani',
+  うし: 'ushi',
+  かめ: 'kame',
+  しか: 'shika',
+  つき: 'tsuki',
   はな: 'hana',
+  やま: 'yama',
   そら: 'sora',
+  ゆき: 'yuki',
+  ほし: 'hoshi',
+  みず: 'mizu',
+  かぜ: 'kaze',
+  あめ: 'ame',
+  ゆめ: 'yume',
+  むし: 'mushi',
+  すな: 'suna',
 };
 const REQUIRED_CARDS = 5;
 
@@ -240,12 +255,30 @@ function revealCurrentWord() {
   setIllustrationFor(state.currentWord);
 }
 
-  };
+function setIllustrationFor(word) {
+  if (!illustration) {
+    return;
+  }
 
-  illustration.onload = () => {
-    illustration.classList.add('has-image');
-    illustration.onload = null;
+  const src = getIllustrationFor(word);
+  const altText = word ? `${word}のイラスト` : PLACEHOLDER_IMAGE.alt;
+  const captionText = word ? altText : PLACEHOLDER_IMAGE.caption;
 
+  if (state.currentIllustrationSrc !== src) {
+    illustration.classList.remove('has-image');
+    illustration.onload = () => {
+      illustration.classList.add('has-image');
+      illustration.onload = null;
+    };
+
+    illustration.src = src;
+    state.currentIllustrationSrc = src;
+  }
+
+  illustration.alt = altText;
+  if (caption) {
+    caption.textContent = captionText;
+  }
 }
 
 function setResultText(message, isCorrect) {

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
+  <rect width="320" height="240" fill="#84A59D" rx="24" />
+  <polygon points="40,200 120,80 200,200" fill="#52796F" />
+  <polygon points="120,200 200,90 280,200" fill="#354F52" opacity="0.85" />
+  <text x="50%" y="75%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="56" fill="#fff">やま</text>
+</svg>

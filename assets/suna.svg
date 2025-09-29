@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
+  <rect width="320" height="240" fill="#FFB703" rx="24" />
+  <path d="M40 180c40-40 80-60 120-60s80 20 120 60v20H40z" fill="#E9C46A" />
+  <text x="50%" y="70%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="56" fill="#8D5524">すな</text>
+</svg>

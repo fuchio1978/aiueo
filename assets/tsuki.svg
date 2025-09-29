@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
+  <rect width="320" height="240" fill="#2D5D8F" rx="24" />
+  <circle cx="220" cy="100" r="60" fill="#FEE440" opacity="0.9" />
+  <text x="50%" y="70%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="56" fill="#fff">つき</text>
+</svg>

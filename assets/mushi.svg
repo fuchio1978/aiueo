@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
+  <rect width="320" height="240" fill="#2D6A4F" rx="24" />
+  <circle cx="130" cy="120" r="28" fill="#95D5B2" />
+  <circle cx="190" cy="120" r="24" fill="#95D5B2" />
+  <rect x="150" y="80" width="20" height="80" rx="10" fill="#40916C" />
+  <text x="50%" y="85%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="48" fill="#fff">むし</text>
+</svg>
