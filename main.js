@@ -271,6 +271,19 @@ function setIllustrationFor(word) {
       illustration.onload = null;
     };
 
+    illustration.onerror = () => {
+      console.warn(`イラストの読み込みに失敗しました: ${word || '(placeholder)'}`);
+      illustration.onerror = null;
+      illustration.onload = null;
+      illustration.src = PLACEHOLDER_IMAGE.src;
+      state.currentIllustrationSrc = PLACEHOLDER_IMAGE.src;
+      illustration.classList.add('has-image');
+      illustration.alt = PLACEHOLDER_IMAGE.alt;
+      if (caption) {
+        caption.textContent = PLACEHOLDER_IMAGE.caption;
+      }
+    };
+
     illustration.src = src;
     state.currentIllustrationSrc = src;
   }
