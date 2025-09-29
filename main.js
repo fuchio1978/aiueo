@@ -142,8 +142,7 @@ function loadNewProblem() {
   }
 
   state.currentWord = pickRandomWord();
-  const illustrationSrc = getIllustrationFor(state.currentWord);
-  setIllustrationFor(state.currentWord, illustrationSrc);
+
   state.selectedWord = null;
   resetPrompt();
 
@@ -159,7 +158,7 @@ function loadNewProblem() {
 function resetPrompt() {
   wordDisplay.textContent = '？？';
   if (!state.currentWord) {
-    setIllustrationFor(null);
+
   }
   if (resultText) {
     resultText.textContent = '';
@@ -309,6 +308,62 @@ function setIllustrationFor(word, srcOverride) {
 
   illustration.alt = alt;
   illustration.src = src;
+}
+
+function setIllustrationFor(word) {
+  if (!word) {
+    setIllustration(
+      PLACEHOLDER_IMAGE.src,
+      PLACEHOLDER_IMAGE.alt,
+      PLACEHOLDER_IMAGE.caption,
+    );
+    if (illustration) {
+      illustration.classList.remove('has-image');
+    }
+    return;
+  }
+
+  const src = getIllustrationFor(word);
+  const isPlaceholder = src === PLACEHOLDER_IMAGE.src;
+  const alt = isPlaceholder ? PLACEHOLDER_IMAGE.alt : `「${word}」のイラスト`;
+  const captionText = isPlaceholder
+    ? PLACEHOLDER_IMAGE.caption
+    : `これは「${word}」のイラストです`;
+
+  if (!illustration) {
+    setIllustration(src, alt, captionText);
+    return;
+  }
+
+  const applyPlaceholder = () => {
+    illustration.onerror = null;
+    illustration.onload = null;
+    illustration.classList.remove('has-image');
+    setIllustration(
+      PLACEHOLDER_IMAGE.src,
+      PLACEHOLDER_IMAGE.alt,
+      PLACEHOLDER_IMAGE.caption,
+    );
+  };
+
+  if (isPlaceholder) {
+    illustration.onerror = null;
+    illustration.onload = null;
+    illustration.classList.remove('has-image');
+    setIllustration(src, alt, captionText);
+    return;
+  }
+
+  illustration.onerror = () => {
+    applyPlaceholder();
+  };
+
+  illustration.onload = () => {
+    illustration.classList.add('has-image');
+    illustration.onload = null;
+  };
+
+  setIllustration(src, alt, captionText);
 }
 
 function setResultText(message, isCorrect) {
