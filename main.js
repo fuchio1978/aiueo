@@ -162,6 +162,7 @@ function loadNewProblem() {
 
   state.selectedWord = null;
   resetPrompt();
+  showIllustrationPreview();
 
   const choices = buildChoiceSet(state.currentWord, WORDS);
   cardButtons.forEach((button, index) => {
@@ -255,10 +256,21 @@ function revealCurrentWord() {
   }
 
   wordDisplay.textContent = state.currentWord;
-  setIllustrationFor(state.currentWord);
+  setIllustrationFor(state.currentWord, { showCaption: true });
 }
 
-function setIllustrationFor(word) {
+function showIllustrationPreview() {
+  if (!state.currentWord) {
+    setIllustrationFor(null, { showCaption: true });
+    return;
+  }
+
+  setIllustrationFor(state.currentWord, { showCaption: false });
+}
+
+function setIllustrationFor(word, options = {}) {
+  const { showCaption = true } = options;
+
   if (!illustration) {
     return;
   }
@@ -284,6 +296,7 @@ function setIllustrationFor(word) {
       illustration.alt = PLACEHOLDER_IMAGE.alt;
       if (caption) {
         caption.textContent = PLACEHOLDER_IMAGE.caption;
+        caption.hidden = false;
       }
     };
 
@@ -293,7 +306,13 @@ function setIllustrationFor(word) {
 
   illustration.alt = altText;
   if (caption) {
-    caption.textContent = captionText;
+    if (showCaption) {
+      caption.textContent = captionText;
+      caption.hidden = false;
+    } else {
+      caption.textContent = '';
+      caption.hidden = true;
+    }
   }
 }
 
