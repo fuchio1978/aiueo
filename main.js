@@ -45,6 +45,8 @@ const state = {
 const wordDisplay = document.getElementById('word-display');
 const illustration = document.getElementById('word-illustration');
 const caption = document.getElementById('illustration-caption');
+const imageLabel = document.getElementById('imageLabel');
+const imageCaption = document.getElementById('imageCaption');
 const resultText = document.getElementById('result-text');
 const cardGrid = document.getElementById('card-grid');
 const speakButton = document.getElementById('speak-btn');
@@ -140,7 +142,7 @@ function loadNewProblem() {
   }
 
   state.currentWord = pickRandomWord();
-  setIllustrationFor(state.currentWord);
+
   state.selectedWord = null;
   resetPrompt();
 
@@ -156,7 +158,7 @@ function loadNewProblem() {
 function resetPrompt() {
   wordDisplay.textContent = '？？';
   if (!state.currentWord) {
-    setIllustration(PLACEHOLDER_IMAGE.src, PLACEHOLDER_IMAGE.alt, PLACEHOLDER_IMAGE.caption);
+
   }
   if (resultText) {
     resultText.textContent = '';
@@ -239,14 +241,73 @@ function revealCurrentWord() {
   setIllustrationFor(state.currentWord);
 }
 
-function setIllustration(src, alt, captionText) {
-  if (illustration) {
-    illustration.src = src;
-    illustration.alt = alt;
-  }
+function updateIllustrationText(word, captionText) {
   if (caption) {
     caption.textContent = captionText;
   }
+  if (imageCaption) {
+    imageCaption.textContent = captionText;
+  }
+  if (imageLabel) {
+    imageLabel.textContent = word ?? '';
+  }
+}
+
+function applyPlaceholderIllustration(word) {
+  updateIllustrationText(word ?? null, PLACEHOLDER_IMAGE.caption);
+
+  if (!illustration) {
+    return;
+  }
+
+  illustration.onerror = null;
+  illustration.onload = null;
+  illustration.classList.remove('has-image');
+  illustration.src = PLACEHOLDER_IMAGE.src;
+  illustration.alt = PLACEHOLDER_IMAGE.alt;
+}
+
+function setIllustrationFor(word, srcOverride) {
+  if (!word) {
+    applyPlaceholderIllustration(null);
+    return;
+  }
+
+  const src = srcOverride ?? getIllustrationFor(word);
+  const isPlaceholder = src === PLACEHOLDER_IMAGE.src;
+  const alt = isPlaceholder ? PLACEHOLDER_IMAGE.alt : `「${word}」のイラスト`;
+  const captionText = isPlaceholder
+    ? PLACEHOLDER_IMAGE.caption
+    : `これは「${word}」のイラストです`;
+
+  updateIllustrationText(word, captionText);
+
+  if (!illustration) {
+    return;
+  }
+
+  if (isPlaceholder) {
+    illustration.onerror = null;
+    illustration.onload = null;
+    illustration.classList.remove('has-image');
+    illustration.alt = alt;
+    illustration.src = src;
+    return;
+  }
+
+  illustration.classList.remove('has-image');
+
+  illustration.onerror = () => {
+    applyPlaceholderIllustration(word);
+  };
+
+  illustration.onload = () => {
+    illustration.classList.add('has-image');
+    illustration.onload = null;
+  };
+
+  illustration.alt = alt;
+  illustration.src = src;
 }
 
 function setIllustrationFor(word) {
