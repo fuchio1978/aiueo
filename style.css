@@ -208,6 +208,15 @@ button {
   width: min(100%, 260px);
 }
 
+#imageLabel,
+#imageCaption,
+.card-label,
+.card-caption,
+.figure-label,
+.figure-caption {
+  display: none !important;
+}
+
 .speech-area {
   display: flex;
   flex-direction: column;
