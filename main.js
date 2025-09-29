@@ -143,8 +143,7 @@ function loadNewProblem() {
   }
 
   state.currentWord = pickRandomWord();
-  state.currentIllustrationSrc = getIllustrationFor(state.currentWord);
-  setIllustrationFor(state.currentWord);
+
   state.selectedWord = null;
   resetPrompt();
 
@@ -159,6 +158,7 @@ function loadNewProblem() {
 
 function resetPrompt() {
   wordDisplay.textContent = '？？';
+
   if (resultText) {
     resultText.textContent = '';
     resultText.style.color = 'var(--muted)';
@@ -240,66 +240,12 @@ function revealCurrentWord() {
   setIllustrationFor(state.currentWord);
 }
 
-function updateIllustrationText(word, captionText) {
-  if (caption) {
-    caption.textContent = captionText;
-  }
-  if (imageCaption) {
-    imageCaption.textContent = captionText;
-  }
-  if (imageLabel) {
-    imageLabel.textContent = word ?? '';
-  }
-}
-
-function setIllustrationFor(word) {
-  const hasWord = typeof word === 'string' && word.length > 0;
-  const src = hasWord
-    ? state.currentIllustrationSrc ?? getIllustrationFor(word)
-    : PLACEHOLDER_IMAGE.src;
-  const isPlaceholder = !hasWord || src === PLACEHOLDER_IMAGE.src;
-  const alt = isPlaceholder ? PLACEHOLDER_IMAGE.alt : `「${word}」のイラスト`;
-  const captionText = isPlaceholder
-    ? PLACEHOLDER_IMAGE.caption
-    : `これは「${word}」のイラストです`;
-
-  updateIllustrationText(hasWord ? word : null, captionText);
-
-  if (!illustration) {
-    return;
-  }
-
-  if (isPlaceholder) {
-    illustration.onload = null;
-    illustration.onerror = null;
-    illustration.classList.remove('has-image');
-    illustration.alt = alt;
-    illustration.src = src;
-    state.currentIllustrationSrc = null;
-    return;
-  }
-
-  illustration.classList.remove('has-image');
-
-  illustration.onerror = () => {
-    illustration.onerror = null;
-    illustration.onload = null;
-    updateIllustrationText(null, PLACEHOLDER_IMAGE.caption);
-    illustration.classList.remove('has-image');
-    illustration.alt = PLACEHOLDER_IMAGE.alt;
-    illustration.src = PLACEHOLDER_IMAGE.src;
-    state.currentIllustrationSrc = null;
   };
 
   illustration.onload = () => {
     illustration.classList.add('has-image');
     illustration.onload = null;
-    illustration.onerror = null;
-  };
 
-  illustration.alt = alt;
-  illustration.src = src;
-  state.currentIllustrationSrc = null;
 }
 
 function setResultText(message, isCorrect) {
