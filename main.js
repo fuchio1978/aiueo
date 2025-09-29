@@ -27,7 +27,13 @@ const PLACEHOLDER_IMAGE = {
   caption: 'カードをえらんで正解を確認しましょう',
 };
 
-const KNOWN_ILLUSTRATIONS = new Set(['ねこ', 'いぬ', 'かに', 'はな', 'そら']);
+const WORD_IMAGE_MAP = {
+  ねこ: 'neko',
+  いぬ: 'inu',
+  かに: 'kani',
+  はな: 'hana',
+  そら: 'sora',
+};
 const REQUIRED_CARDS = 5;
 
 const state = {
@@ -134,6 +140,7 @@ function loadNewProblem() {
   }
 
   state.currentWord = pickRandomWord();
+  setIllustrationFor(state.currentWord);
   state.selectedWord = null;
   resetPrompt();
 
@@ -148,7 +155,9 @@ function loadNewProblem() {
 
 function resetPrompt() {
   wordDisplay.textContent = '？？';
-  setIllustration(PLACEHOLDER_IMAGE.src, PLACEHOLDER_IMAGE.alt, PLACEHOLDER_IMAGE.caption);
+  if (!state.currentWord) {
+    setIllustration(PLACEHOLDER_IMAGE.src, PLACEHOLDER_IMAGE.alt, PLACEHOLDER_IMAGE.caption);
+  }
   if (resultText) {
     resultText.textContent = '';
     resultText.style.color = 'var(--muted)';
@@ -227,13 +236,7 @@ function revealCurrentWord() {
   }
 
   wordDisplay.textContent = state.currentWord;
-  const illustrationSrc = getIllustrationFor(state.currentWord);
-  const isPlaceholder = illustrationSrc === PLACEHOLDER_IMAGE.src;
-  const alt = isPlaceholder ? PLACEHOLDER_IMAGE.alt : `「${state.currentWord}」のイラスト`;
-  const captionText = isPlaceholder
-    ? PLACEHOLDER_IMAGE.caption
-    : `これは「${state.currentWord}」のイラストです`;
-  setIllustration(illustrationSrc, alt, captionText);
+  setIllustrationFor(state.currentWord);
 }
 
 function setIllustration(src, alt, captionText) {
@@ -246,6 +249,62 @@ function setIllustration(src, alt, captionText) {
   }
 }
 
+function setIllustrationFor(word) {
+  if (!word) {
+    setIllustration(
+      PLACEHOLDER_IMAGE.src,
+      PLACEHOLDER_IMAGE.alt,
+      PLACEHOLDER_IMAGE.caption,
+    );
+    if (illustration) {
+      illustration.classList.remove('has-image');
+    }
+    return;
+  }
+
+  const src = getIllustrationFor(word);
+  const isPlaceholder = src === PLACEHOLDER_IMAGE.src;
+  const alt = isPlaceholder ? PLACEHOLDER_IMAGE.alt : `「${word}」のイラスト`;
+  const captionText = isPlaceholder
+    ? PLACEHOLDER_IMAGE.caption
+    : `これは「${word}」のイラストです`;
+
+  if (!illustration) {
+    setIllustration(src, alt, captionText);
+    return;
+  }
+
+  const applyPlaceholder = () => {
+    illustration.onerror = null;
+    illustration.onload = null;
+    illustration.classList.remove('has-image');
+    setIllustration(
+      PLACEHOLDER_IMAGE.src,
+      PLACEHOLDER_IMAGE.alt,
+      PLACEHOLDER_IMAGE.caption,
+    );
+  };
+
+  if (isPlaceholder) {
+    illustration.onerror = null;
+    illustration.onload = null;
+    illustration.classList.remove('has-image');
+    setIllustration(src, alt, captionText);
+    return;
+  }
+
+  illustration.onerror = () => {
+    applyPlaceholder();
+  };
+
+  illustration.onload = () => {
+    illustration.classList.add('has-image');
+    illustration.onload = null;
+  };
+
+  setIllustration(src, alt, captionText);
+}
+
 function setResultText(message, isCorrect) {
   if (!resultText) {
     return;
@@ -256,10 +315,15 @@ function setResultText(message, isCorrect) {
 }
 
 function getIllustrationFor(word) {
-  if (KNOWN_ILLUSTRATIONS.has(word)) {
-    return `assets/${word}.svg`;
+  if (!word) {
+    return PLACEHOLDER_IMAGE.src;
   }
-  return PLACEHOLDER_IMAGE.src;
+
+  if (typeof WORD_IMAGE_MAP !== 'undefined' && WORD_IMAGE_MAP[word]) {
+    return `assets/${WORD_IMAGE_MAP[word]}.svg`;
+  }
+
+  return `assets/${word}.svg`;
 }
 
 function speakWord(text) {
