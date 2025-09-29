@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
+  <rect width="320" height="240" fill="#577590" rx="24" />
+  <g fill="#ADE8F4">
+    <ellipse cx="90" cy="120" rx="14" ry="20" />
+    <ellipse cx="140" cy="160" rx="12" ry="18" />
+    <ellipse cx="200" cy="110" rx="10" ry="16" />
+    <ellipse cx="240" cy="150" rx="13" ry="19" />
+  </g>
+  <text x="50%" y="82%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="52" fill="#fff">あめ</text>
+</svg>
