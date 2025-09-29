@@ -255,10 +255,10 @@ function revealCurrentWord() {
   }
 
   wordDisplay.textContent = state.currentWord;
-  setIllustrationFor(state.currentWord);
+  setIllustrationFor(state.currentWord, { reveal: true });
 }
 
-function setIllustrationFor(word) {
+function setIllustrationFor(word, { reveal = true } = {}) {
   if (!illustration) {
     return;
   }
@@ -266,6 +266,7 @@ function setIllustrationFor(word) {
   const src = getIllustrationFor(word);
   const altText = word ? `${word}のイラスト` : PLACEHOLDER_IMAGE.alt;
   const captionText = word ? altText : PLACEHOLDER_IMAGE.caption;
+  const shouldHideCaption = Boolean(word) && !reveal;
 
   if (state.currentIllustrationSrc !== src) {
     illustration.classList.remove('has-image');
@@ -284,6 +285,7 @@ function setIllustrationFor(word) {
       illustration.alt = PLACEHOLDER_IMAGE.alt;
       if (caption) {
         caption.textContent = PLACEHOLDER_IMAGE.caption;
+        caption.hidden = false;
       }
     };
 
@@ -293,7 +295,13 @@ function setIllustrationFor(word) {
 
   illustration.alt = altText;
   if (caption) {
-    caption.textContent = captionText;
+    if (shouldHideCaption) {
+      caption.textContent = '';
+      caption.hidden = true;
+    } else {
+      caption.textContent = captionText;
+      caption.hidden = false;
+    }
   }
 }
 
