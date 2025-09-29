@@ -40,6 +40,7 @@ const state = {
   currentWord: null,
   speechSupported: false,
   selectedWord: null,
+  currentIllustrationSrc: null,
 };
 
 const wordDisplay = document.getElementById('word-display');
@@ -157,9 +158,7 @@ function loadNewProblem() {
 
 function resetPrompt() {
   wordDisplay.textContent = '？？';
-  if (!state.currentWord) {
 
-  }
   if (resultText) {
     resultText.textContent = '';
     resultText.style.color = 'var(--muted)';
@@ -241,129 +240,12 @@ function revealCurrentWord() {
   setIllustrationFor(state.currentWord);
 }
 
-function updateIllustrationText(word, captionText) {
-  if (caption) {
-    caption.textContent = captionText;
-  }
-  if (imageCaption) {
-    imageCaption.textContent = captionText;
-  }
-  if (imageLabel) {
-    imageLabel.textContent = word ?? '';
-  }
-}
-
-function applyPlaceholderIllustration(word) {
-  updateIllustrationText(word ?? null, PLACEHOLDER_IMAGE.caption);
-
-  if (!illustration) {
-    return;
-  }
-
-  illustration.onerror = null;
-  illustration.onload = null;
-  illustration.classList.remove('has-image');
-  illustration.src = PLACEHOLDER_IMAGE.src;
-  illustration.alt = PLACEHOLDER_IMAGE.alt;
-}
-
-function setIllustrationFor(word, srcOverride) {
-  if (!word) {
-    applyPlaceholderIllustration(null);
-    return;
-  }
-
-  const src = srcOverride ?? getIllustrationFor(word);
-  const isPlaceholder = src === PLACEHOLDER_IMAGE.src;
-  const alt = isPlaceholder ? PLACEHOLDER_IMAGE.alt : `「${word}」のイラスト`;
-  const captionText = isPlaceholder
-    ? PLACEHOLDER_IMAGE.caption
-    : `これは「${word}」のイラストです`;
-
-  updateIllustrationText(word, captionText);
-
-  if (!illustration) {
-    return;
-  }
-
-  if (isPlaceholder) {
-    illustration.onerror = null;
-    illustration.onload = null;
-    illustration.classList.remove('has-image');
-    illustration.alt = alt;
-    illustration.src = src;
-    return;
-  }
-
-  illustration.classList.remove('has-image');
-
-  illustration.onerror = () => {
-    applyPlaceholderIllustration(word);
   };
 
   illustration.onload = () => {
     illustration.classList.add('has-image');
     illustration.onload = null;
-  };
 
-  illustration.alt = alt;
-  illustration.src = src;
-}
-
-function setIllustrationFor(word) {
-  if (!word) {
-    setIllustration(
-      PLACEHOLDER_IMAGE.src,
-      PLACEHOLDER_IMAGE.alt,
-      PLACEHOLDER_IMAGE.caption,
-    );
-    if (illustration) {
-      illustration.classList.remove('has-image');
-    }
-    return;
-  }
-
-  const src = getIllustrationFor(word);
-  const isPlaceholder = src === PLACEHOLDER_IMAGE.src;
-  const alt = isPlaceholder ? PLACEHOLDER_IMAGE.alt : `「${word}」のイラスト`;
-  const captionText = isPlaceholder
-    ? PLACEHOLDER_IMAGE.caption
-    : `これは「${word}」のイラストです`;
-
-  if (!illustration) {
-    setIllustration(src, alt, captionText);
-    return;
-  }
-
-  const applyPlaceholder = () => {
-    illustration.onerror = null;
-    illustration.onload = null;
-    illustration.classList.remove('has-image');
-    setIllustration(
-      PLACEHOLDER_IMAGE.src,
-      PLACEHOLDER_IMAGE.alt,
-      PLACEHOLDER_IMAGE.caption,
-    );
-  };
-
-  if (isPlaceholder) {
-    illustration.onerror = null;
-    illustration.onload = null;
-    illustration.classList.remove('has-image');
-    setIllustration(src, alt, captionText);
-    return;
-  }
-
-  illustration.onerror = () => {
-    applyPlaceholder();
-  };
-
-  illustration.onload = () => {
-    illustration.classList.add('has-image');
-    illustration.onload = null;
-  };
-
-  setIllustration(src, alt, captionText);
 }
 
 function setResultText(message, isCorrect) {
