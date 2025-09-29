@@ -96,7 +96,8 @@ function detectSpeechSupport() {
 
   return (
     'speechSynthesis' in window &&
-    typeof window.speechSynthesis?.speak === 'function' &&
+    window.speechSynthesis &&
+    typeof window.speechSynthesis.speak === 'function' &&
     typeof window.SpeechSynthesisUtterance === 'function'
   );
 }
@@ -164,7 +165,9 @@ function loadNewProblem() {
 
   const choices = buildChoiceSet(state.currentWord, WORDS);
   cardButtons.forEach((button, index) => {
-    const word = choices[index] ?? '';
+    const choice = choices[index];
+    const word =
+      typeof choice !== 'undefined' && choice !== null ? choice : '';
     button.textContent = word;
     button.dataset.word = word;
     button.classList.remove('selected', 'correct', 'incorrect');
