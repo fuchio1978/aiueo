@@ -258,15 +258,69 @@ function revealCurrentWord() {
   setIllustrationFor(state.currentWord, { reveal: true });
 }
 
-function setIllustrationFor(word, { reveal = true } = {}) {
+function normalizeIllustrationOptions(options) {
+  if (typeof options === 'boolean') {
+    return { reveal: options };
+  }
+
+  if (!options) {
+    return { reveal: true, preview: false };
+  }
+
+  const normalized = { ...options };
+
+  if (typeof normalized.reveal !== 'boolean') {
+    if (typeof normalized.preview === 'boolean') {
+      normalized.reveal = !normalized.preview;
+    } else {
+      normalized.reveal = true;
+    }
+  }
+
+  if (typeof normalized.preview !== 'boolean') {
+    normalized.preview = !normalized.reveal;
+  }
+
+  return normalized;
+}
+
+function updateIllustrationLabel(text) {
+  if (imageLabel) {
+    imageLabel.textContent = text;
+  }
+}
+
+function updateIllustrationCaptionElements(text, hidden) {
+  if (caption) {
+    caption.textContent = hidden ? '' : text;
+    caption.hidden = Boolean(hidden);
+  }
+
+  if (imageCaption) {
+    imageCaption.textContent = hidden ? '' : text;
+    imageCaption.hidden = Boolean(hidden);
+  }
+}
+
+function setIllustrationFor(word, options) {
   if (!illustration) {
     return;
   }
 
+  const { reveal, preview, captionText: explicitCaption, altText: explicitAlt } =
+    normalizeIllustrationOptions(options);
   const src = getIllustrationFor(word);
-  const altText = word ? `${word}のイラスト` : PLACEHOLDER_IMAGE.alt;
-  const captionText = word ? altText : PLACEHOLDER_IMAGE.caption;
+  const altText = explicitAlt || (word ? `${word}のイラスト` : PLACEHOLDER_IMAGE.alt);
+  const captionText =
+    explicitCaption !== undefined && explicitCaption !== null
+      ? explicitCaption
+      : word
+        ? altText
+        : PLACEHOLDER_IMAGE.caption;
   const shouldHideCaption = Boolean(word) && !reveal;
+
+  illustration.dataset.word = word || '';
+  illustration.dataset.preview = preview ? 'true' : 'false';
 
   if (state.currentIllustrationSrc !== src) {
     illustration.classList.remove('has-image');
@@ -283,10 +337,10 @@ function setIllustrationFor(word, { reveal = true } = {}) {
       state.currentIllustrationSrc = PLACEHOLDER_IMAGE.src;
       illustration.classList.add('has-image');
       illustration.alt = PLACEHOLDER_IMAGE.alt;
-      if (caption) {
-        caption.textContent = PLACEHOLDER_IMAGE.caption;
-        caption.hidden = false;
-      }
+      illustration.dataset.word = '';
+      illustration.dataset.preview = 'false';
+      updateIllustrationLabel(PLACEHOLDER_IMAGE.alt);
+      updateIllustrationCaptionElements(PLACEHOLDER_IMAGE.caption, false);
     };
 
     illustration.src = src;
@@ -294,15 +348,8 @@ function setIllustrationFor(word, { reveal = true } = {}) {
   }
 
   illustration.alt = altText;
-  if (caption) {
-    if (shouldHideCaption) {
-      caption.textContent = '';
-      caption.hidden = true;
-    } else {
-      caption.textContent = captionText;
-      caption.hidden = false;
-    }
-  }
+  updateIllustrationLabel(altText);
+  updateIllustrationCaptionElements(captionText, shouldHideCaption);
 }
 
 function setResultText(message, isCorrect) {
