@@ -69,6 +69,10 @@ const speakButton = document.getElementById('speak-btn');
 const speechNotice = document.getElementById('speech-notice');
 const newProblemButton = document.getElementById('new-problem-btn');
 
+const illustrationContainer = illustration
+  ? illustration.closest('.illustration')
+  : null;
+
 let cardButtons = [];
 
 initialize();
@@ -268,8 +272,47 @@ function showIllustrationPreview() {
   setIllustrationFor(state.currentWord, { showCaption: false });
 }
 
+function normalizeIllustrationOptions(options) {
+  if (typeof options === 'boolean') {
+    return {
+      reveal: options,
+      preview: !options,
+      showCaption: options,
+    };
+  }
+
+  const isObject = options && typeof options === 'object';
+  const input = isObject ? options : {};
+  const has = (prop) => Object.prototype.hasOwnProperty.call(input, prop);
+
+  let reveal = has('reveal') ? Boolean(input.reveal) : true;
+  let preview = has('preview')
+    ? Boolean(input.preview)
+    : has('reveal')
+    ? !reveal
+    : false;
+  let showCaption = has('showCaption')
+    ? Boolean(input.showCaption)
+    : has('reveal')
+    ? reveal
+    : has('preview')
+    ? !preview
+    : true;
+
+  if (!has('preview') && !has('reveal') && has('showCaption')) {
+    preview = !showCaption;
+    reveal = showCaption;
+  }
+
+  return {
+    reveal,
+    preview,
+    showCaption,
+  };
+}
+
 function setIllustrationFor(word, options = {}) {
-  const { showCaption = true } = options;
+  const { reveal, preview, showCaption } = normalizeIllustrationOptions(options);
 
   if (!illustration) {
     return;
@@ -305,6 +348,12 @@ function setIllustrationFor(word, options = {}) {
   }
 
   illustration.alt = altText;
+  illustration.dataset.preview = preview ? 'true' : 'false';
+  illustration.dataset.reveal = reveal ? 'true' : 'false';
+  if (illustrationContainer) {
+    illustrationContainer.dataset.preview = preview ? 'true' : 'false';
+    illustrationContainer.dataset.reveal = reveal ? 'true' : 'false';
+  }
   if (caption) {
     if (showCaption) {
       caption.textContent = captionText;
