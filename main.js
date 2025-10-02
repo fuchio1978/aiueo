@@ -105,6 +105,13 @@ let cardButtons = [];
 let letterTiles = [];
 let dropSlotElements = [];
 
+const dragDropState = {
+  activeTile: null,
+  dropTarget: null,
+  animationFrame: null,
+  scheduledCallbacks: [],
+};
+
 initialize();
 
 function initialize() {
@@ -165,6 +172,7 @@ function buildLetterTiles() {
     tile.dataset.letter = '';
     tile.dataset.tileIndex = String(index);
     tile.draggable = true;
+    tile.tabIndex = 0;
     tile.setAttribute('role', 'listitem');
     tile.setAttribute('aria-roledescription', 'ドラッグできるひらがなカード');
     tile.setAttribute('aria-grabbed', 'false');
@@ -172,6 +180,8 @@ function buildLetterTiles() {
     letterPool.appendChild(tile);
     return tile;
   });
+
+  initializeDragAndDrop();
 }
 
 function renderDropSlots() {
@@ -199,8 +209,11 @@ function renderDropSlots() {
     slot.setAttribute('aria-roledescription', '文字カードのドロップ先');
     slot.setAttribute('aria-dropeffect', 'move');
     slot.textContent = '？';
+    slot.dataset.letter = '';
     slot.classList.remove('is-drop-target', 'is-filled');
   });
+
+  initializeDragAndDrop();
 }
 
 function wireEvents() {
@@ -296,6 +309,248 @@ function loadNewProblem() {
     button.textContent = word;
     button.dataset.word = word;
     button.classList.remove('selected', 'correct', 'incorrect');
+  });
+}
+
+function initializeDragAndDrop() {
+  if (!letterPool) {
+    return;
+  }
+
+  letterTiles.forEach((tile) => {
+    tile.removeEventListener('dragstart', handleTileDragStart);
+    tile.removeEventListener('dragend', handleTileDragEnd);
+    tile.removeEventListener('keydown', handleTileKeyDown);
+
+    tile.addEventListener('dragstart', handleTileDragStart);
+    tile.addEventListener('dragend', handleTileDragEnd);
+    tile.addEventListener('keydown', handleTileKeyDown);
+  });
+
+  const dropTargets = [...dropSlotElements];
+  dropTargets.forEach((slot) => {
+    slot.removeEventListener('dragenter', handleDropTargetEnter);
+    slot.removeEventListener('dragover', handleDropTargetOver);
+    slot.removeEventListener('dragleave', handleDropTargetLeave);
+    slot.removeEventListener('drop', handleDropOnSlot);
+
+    slot.addEventListener('dragenter', handleDropTargetEnter);
+    slot.addEventListener('dragover', handleDropTargetOver);
+    slot.addEventListener('dragleave', handleDropTargetLeave);
+    slot.addEventListener('drop', handleDropOnSlot);
+  });
+
+  letterPool.removeEventListener('dragenter', handleDropTargetEnter);
+  letterPool.removeEventListener('dragover', handleDropTargetOver);
+  letterPool.removeEventListener('dragleave', handleDropTargetLeave);
+  letterPool.removeEventListener('drop', handleDropOnPool);
+
+  letterPool.addEventListener('dragenter', handleDropTargetEnter);
+  letterPool.addEventListener('dragover', handleDropTargetOver);
+  letterPool.addEventListener('dragleave', handleDropTargetLeave);
+  letterPool.addEventListener('drop', handleDropOnPool);
+}
+
+function handleTileDragStart(event) {
+  const tile = event.currentTarget;
+  if (!tile || tile.dataset.letter === '') {
+    event.preventDefault();
+    return;
+  }
+
+  dragDropState.activeTile = tile;
+  tile.classList.add('is-dragging');
+  tile.setAttribute('aria-grabbed', 'true');
+
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', tile.dataset.letter || tile.textContent || '');
+  }
+}
+
+function handleTileDragEnd(event) {
+  const tile = event.currentTarget;
+  tile.classList.remove('is-dragging');
+  tile.setAttribute('aria-grabbed', 'false');
+  dragDropState.activeTile = null;
+  setDropTarget(null);
+}
+
+function handleDropTargetEnter(event) {
+  if (!dragDropState.activeTile) {
+    return;
+  }
+
+  const target = getDropTarget(event.currentTarget);
+  if (!target) {
+    return;
+  }
+
+  event.preventDefault();
+  setDropTarget(target);
+}
+
+function handleDropTargetOver(event) {
+  if (!dragDropState.activeTile) {
+    return;
+  }
+
+  const target = getDropTarget(event.currentTarget);
+  if (!target) {
+    return;
+  }
+
+  event.preventDefault();
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = target === letterPool ? 'none' : 'move';
+  }
+  setDropTarget(target);
+}
+
+function handleDropTargetLeave(event) {
+  const target = getDropTarget(event.currentTarget);
+  if (!target) {
+    return;
+  }
+
+  if (dragDropState.dropTarget === target) {
+    setDropTarget(null);
+  }
+}
+
+function handleDropOnSlot(event) {
+  if (!dragDropState.activeTile) {
+    return;
+  }
+
+  const slot = getDropTarget(event.currentTarget);
+  if (!slot) {
+    return;
+  }
+
+  event.preventDefault();
+  const letter = dragDropState.activeTile.dataset.letter || dragDropState.activeTile.textContent || '';
+  fillDropSlot(slot, letter);
+  handleTileDragEnd({ currentTarget: dragDropState.activeTile });
+}
+
+function handleDropOnPool(event) {
+  if (!dragDropState.activeTile) {
+    return;
+  }
+
+  event.preventDefault();
+  handleTileDragEnd({ currentTarget: dragDropState.activeTile });
+}
+
+function handleTileKeyDown(event) {
+  const tile = event.currentTarget;
+  if (!tile || tile.dataset.letter === '') {
+    return;
+  }
+
+  if (event.key === 'Enter' || event.key === ' ') {
+    const emptySlot = dropSlotElements.find((slot) => !slot.classList.contains('is-filled'));
+    if (emptySlot) {
+      event.preventDefault();
+      fillDropSlot(emptySlot, tile.dataset.letter || tile.textContent || '');
+    }
+  }
+}
+
+function fillDropSlot(slot, letter) {
+  if (!slot) {
+    return;
+  }
+
+  const value = typeof letter === 'string' ? letter.trim() : '';
+  if (value === '') {
+    clearDropSlot(slot);
+    return;
+  }
+
+  scheduleAnimationFrame(() => {
+    slot.textContent = value;
+    slot.dataset.letter = value;
+    slot.classList.add('is-filled');
+    const index = Number(slot.dataset.slotIndex || 0);
+    const position = Number.isNaN(index) ? '' : `${index + 1}`;
+    slot.setAttribute('aria-label', `${position}文字目のスロット（${value}）`);
+  });
+}
+
+function clearDropSlot(slot) {
+  if (!slot) {
+    return;
+  }
+
+  scheduleAnimationFrame(() => {
+    slot.textContent = '？';
+    slot.dataset.letter = '';
+    slot.classList.remove('is-filled');
+    const index = Number(slot.dataset.slotIndex || 0);
+    const position = Number.isNaN(index) ? '' : `${index + 1}`;
+    slot.setAttribute('aria-label', `${position}文字目のスロット`);
+  });
+}
+
+function setDropTarget(target) {
+  if (dragDropState.dropTarget === target) {
+    return;
+  }
+
+  const previous = dragDropState.dropTarget;
+  dragDropState.dropTarget = target && target !== letterPool ? target : null;
+
+  scheduleAnimationFrame(() => {
+    if (previous && previous.classList) {
+      previous.classList.remove('is-drop-target');
+    }
+    if (dragDropState.dropTarget && dragDropState.dropTarget.classList) {
+      dragDropState.dropTarget.classList.add('is-drop-target');
+    }
+  });
+}
+
+function getDropTarget(element) {
+  if (!element) {
+    return null;
+  }
+
+  if (element === letterPool) {
+    return letterPool;
+  }
+
+  return element.classList && element.classList.contains('drop-slot') ? element : null;
+}
+
+function scheduleAnimationFrame(callback) {
+  if (typeof callback !== 'function') {
+    return;
+  }
+
+  if (typeof window === 'undefined' || typeof window.requestAnimationFrame !== 'function') {
+    callback();
+    return;
+  }
+
+  dragDropState.scheduledCallbacks.push(callback);
+
+  if (dragDropState.animationFrame) {
+    return;
+  }
+
+  dragDropState.animationFrame = window.requestAnimationFrame(() => {
+    const tasks = dragDropState.scheduledCallbacks.slice();
+    dragDropState.scheduledCallbacks.length = 0;
+    dragDropState.animationFrame = null;
+    tasks.forEach((task) => {
+      try {
+        task();
+      } catch (error) {
+        console.error('ドラッグ処理中の更新に失敗しました', error);
+      }
+    });
   });
 }
 
