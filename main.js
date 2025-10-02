@@ -50,6 +50,16 @@ const WORD_IMAGE_MAP = {
   すな: 'suna',
 };
 const REQUIRED_CARDS = 5;
+const LETTER_TILE_COUNT = 5;
+const DROP_SLOT_COUNT = 2;
+const UNIQUE_LETTERS = Array.from(
+  new Set(
+    WORDS.reduce((acc, word) => {
+      word.split('').forEach((char) => acc.push(char));
+      return acc;
+    }, [])
+  )
+);
 
 const state = {
   currentWord: null,
@@ -78,6 +88,8 @@ const imageLabel = document.getElementById('imageLabel');
 const imageCaption = document.getElementById('imageCaption');
 const resultText = document.getElementById('result-text');
 const cardGrid = document.getElementById('card-grid');
+const letterPool = document.getElementById('letter-pool');
+const dropSlotsContainer = document.getElementById('drop-slots');
 const speakButton = document.getElementById('speak-btn');
 const speechNotice = document.getElementById('speech-notice');
 const newProblemButton = document.getElementById('new-problem-btn');
@@ -87,6 +99,8 @@ const illustrationContainer = illustration
   : null;
 
 let cardButtons = [];
+let letterTiles = [];
+let dropSlotElements = [];
 
 initialize();
 
@@ -98,6 +112,8 @@ function initialize() {
   state.speechSupported = detectSpeechSupport();
   createFeedbackSounds();
   buildCards();
+  renderDropSlots();
+  buildLetterTiles();
   wireEvents();
   loadNewProblem();
 }
@@ -131,6 +147,56 @@ function buildCards() {
     button.addEventListener('click', onCardClick);
     cardGrid.appendChild(button);
     return button;
+  });
+}
+
+function buildLetterTiles() {
+  if (!letterPool) {
+    return;
+  }
+
+  letterPool.innerHTML = '';
+  letterTiles = Array.from({ length: LETTER_TILE_COUNT }, (_, index) => {
+    const tile = document.createElement('div');
+    tile.className = 'letter-tile';
+    tile.dataset.letter = '';
+    tile.dataset.tileIndex = String(index);
+    tile.draggable = true;
+    tile.setAttribute('role', 'listitem');
+    tile.setAttribute('aria-roledescription', 'ドラッグできるひらがなカード');
+    tile.setAttribute('aria-grabbed', 'false');
+    tile.textContent = '';
+    letterPool.appendChild(tile);
+    return tile;
+  });
+}
+
+function renderDropSlots() {
+  if (!dropSlotsContainer) {
+    return;
+  }
+
+  dropSlotElements = Array.from(dropSlotsContainer.querySelectorAll('.drop-slot'));
+
+  const deficit = DROP_SLOT_COUNT - dropSlotElements.length;
+  for (let i = 0; i < deficit; i += 1) {
+    const slot = document.createElement('div');
+    slot.className = 'drop-slot';
+    slot.dataset.slotIndex = String(dropSlotElements.length + i);
+    slot.setAttribute('role', 'listitem');
+    slot.setAttribute('aria-dropeffect', 'move');
+    dropSlotsContainer.appendChild(slot);
+  }
+
+  dropSlotElements = Array.from(dropSlotsContainer.querySelectorAll('.drop-slot'));
+  dropSlotElements.slice(0, DROP_SLOT_COUNT).forEach((slot, index) => {
+    slot.dataset.slotIndex = String(index);
+    slot.setAttribute('role', 'listitem');
+    slot.setAttribute('aria-label', `${index + 1}文字目のスロット`);
+    slot.setAttribute('aria-roledescription', '文字カードのドロップ先');
+    slot.setAttribute('aria-dropeffect', 'move');
+    slot.textContent = '？';
+    slot.classList.remove('is-drop-target', 'is-filled');
   });
 }
 
@@ -181,6 +247,8 @@ function loadNewProblem() {
   state.selectedWord = null;
   resetPrompt();
   showIllustrationPreview();
+  renderDropSlots();
+  renderLetterCandidates(state.currentWord);
 
   const choices = buildChoiceSet(state.currentWord, WORDS);
   cardButtons.forEach((button, index) => {
@@ -191,6 +259,45 @@ function loadNewProblem() {
     button.dataset.word = word;
     button.classList.remove('selected', 'correct', 'incorrect');
   });
+}
+
+function renderLetterCandidates(word) {
+  if (!letterPool) {
+    return;
+  }
+
+  if (!letterTiles.length) {
+    buildLetterTiles();
+  }
+
+  const letters = buildLetterCandidateSet(word);
+  letterTiles.forEach((tile, index) => {
+    const letter = typeof letters[index] === 'string' ? letters[index] : '';
+    tile.textContent = letter;
+    tile.dataset.letter = letter;
+    tile.setAttribute('aria-grabbed', 'false');
+    tile.setAttribute('aria-hidden', letter === '' ? 'true' : 'false');
+    tile.hidden = letter === '';
+  });
+}
+
+function buildLetterCandidateSet(word) {
+  if (typeof word !== 'string' || word.length === 0) {
+    return new Array(LETTER_TILE_COUNT).fill('');
+  }
+
+  const requiredLetters = word.split('');
+  const candidates = [...requiredLetters];
+
+  while (candidates.length < LETTER_TILE_COUNT) {
+    const poolIndex = Math.floor(Math.random() * UNIQUE_LETTERS.length);
+    const letter = UNIQUE_LETTERS[poolIndex];
+    if (typeof letter === 'string' && letter.length > 0) {
+      candidates.push(letter);
+    }
+  }
+
+  return shuffle(candidates).slice(0, LETTER_TILE_COUNT);
 }
 
 function resetPrompt() {

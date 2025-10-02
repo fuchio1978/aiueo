@@ -24,6 +24,37 @@
       <section class="choices" aria-labelledby="choices-title">
         <h2 id="choices-title">ことばをえらぶ</h2>
         <div class="card-grid" id="card-grid" role="list"></div>
+        <div class="letter-play-area" aria-label="文字カードを並べ替えるエリア">
+          <div
+            class="letter-pool"
+            id="letter-pool"
+            role="list"
+            aria-label="ひらがなカードの候補"
+            aria-roledescription="ドラッグ可能なカードの一覧"
+          ></div>
+          <div
+            class="drop-slots"
+            id="drop-slots"
+            role="list"
+            aria-label="文字を置くスロット"
+            aria-roledescription="ドロップできる場所"
+          >
+            <div
+              class="drop-slot"
+              data-slot-index="0"
+              role="listitem"
+              aria-label="1文字目のスロット"
+              aria-dropeffect="move"
+            ></div>
+            <div
+              class="drop-slot"
+              data-slot-index="1"
+              role="listitem"
+              aria-label="2文字目のスロット"
+              aria-dropeffect="move"
+            ></div>
+          </div>
+        </div>
       </section>
     </main>
     <footer class="app-footer">
