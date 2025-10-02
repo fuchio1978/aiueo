@@ -1,31 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" role="img" aria-labelledby="title desc">
+  <title id="title">Cartoon illustration of a friendly dog</title>
+  <desc id="desc">A tan dog with floppy ears, big eyes, and a red collar sitting against a warm brown rounded rectangle.</desc>
   <rect width="320" height="240" fill="#C97A40" rx="28" />
-  <g transform="translate(160 132)">
-    <path d="M92 70c22 2 32 22 20 40s-34 26-56 20" fill="none" stroke="#FFE5D0" stroke-width="18" stroke-linecap="round" />
-    <ellipse cx="0" cy="72" rx="88" ry="58" fill="#FFE5D0" />
-    <ellipse cx="0" cy="74" rx="50" ry="40" fill="#F4C095" />
-    <path d="M-92 34c-22 2-32 22-20 40s34 26 56 20" fill="none" stroke="#FFE5D0" stroke-width="18" stroke-linecap="round" />
-    <g fill="#FFE5D0">
-      <circle cx="0" cy="-8" r="58" />
-      <path d="M-32-24c-26-26-60-14-54 20 4 22 16 36 26 44l30-24z" />
-      <path d="M32-24c26-26 60-14 54 20-4 22-16 36-26 44l-30-24z" />
-    </g>
-    <path d="M-46-18c-18-16-46-6-40 18 4 18 14 28 26 34l24-26z" fill="#8C5A2B" />
-    <path d="M46-18c18-16 46-6 40 18-4 18-14 28-26 34l-24-26z" fill="#8C5A2B" />
-    <ellipse cx="0" cy="24" rx="40" ry="34" fill="#F4C095" />
-    <ellipse cx="0" cy="34" rx="24" ry="18" fill="#3F2F1E" />
-    <path d="M0 42c8 0 14 6 14 14s-8 14-14 14-14-6-14-14 6-14 14-14z" fill="#FFE5D0" />
-    <g fill="#3F2F1E">
-      <circle cx="-20" cy="-8" r="10" />
-      <circle cx="20" cy="-8" r="10" />
-    </g>
-    <path d="M-18 10c8 8 28 8 36 0" fill="none" stroke="#3F2F1E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
-    <g fill="#8C5A2B">
-      <circle cx="-34" cy="18" r="12" />
-      <circle cx="34" cy="18" r="12" />
-    </g>
-    <path d="M-72 56c12 18 30 26 72 26s60-8 72-26" fill="none" stroke="#3F2F1E" stroke-width="6" stroke-linecap="round" />
+  <g transform="translate(160 126)">
+    <ellipse cx="0" cy="68" rx="78" ry="48" fill="#F9DCC0" />
+    <path d="M-52 40c-22 0-46 22-38 50 10 36 70 34 90 34s80 2 90-34c8-28-16-50-38-50" fill="none" stroke="#A96D38" stroke-width="10" stroke-linecap="round" />
+    <path d="M-70 24c-16 16-20 42-6 60 12 16 32 22 54 22h104c22 0 42-6 54-22 14-18 10-44-6-60" fill="#F3C99E" />
+    <ellipse cx="0" cy="18" rx="88" ry="72" fill="#F9DCC0" />
+    <path d="M-66-10c-30-34-70-22-68 18 0 20 12 44 32 60l44-26z" fill="#B2753F" />
+    <path d="M66-10c30-34 70-22 68 18 0 20-12 44-32 60l-44-26z" fill="#B2753F" />
+    <path d="M-60-6c-24-26-54-16-50 14 2 18 12 32 30 46l34-22z" fill="#7E4B24" />
+    <path d="M60-6c24-26 54-16 50 14-2 18-12 32-30 46l-34-22z" fill="#7E4B24" />
+    <ellipse cx="0" cy="-12" rx="64" ry="58" fill="#F9DCC0" />
+    <ellipse cx="0" cy="42" rx="46" ry="40" fill="#F3C99E" />
+    <path d="M0 32c24 0 46 18 46 40 0 20-20 36-46 36s-46-16-46-36c0-22 22-40 46-40z" fill="#E8B686" />
+    <path d="M0 28c18 0 30 12 30 26 0 18-18 26-30 26s-30-8-30-26c0-14 12-26 30-26z" fill="#3E2B1A" />
+    <ellipse cx="-22" cy="-20" rx="14" ry="18" fill="#3E2B1A" />
+    <ellipse cx="22" cy="-20" rx="14" ry="18" fill="#3E2B1A" />
+    <circle cx="-22" cy="-24" r="6" fill="#FFFFFF" opacity="0.9" />
+    <circle cx="22" cy="-24" r="6" fill="#FFFFFF" opacity="0.9" />
+    <path d="M-16 12c12 10 36 10 48 0" fill="none" stroke="#3E2B1A" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M0 10c14 0 26 12 26 24s-12 22-26 22-26-10-26-22 12-24 26-24z" fill="#2B1C11" />
+    <path d="M0 24c10 0 16 8 16 16s-6 16-16 16-16-8-16-16 6-16 16-16z" fill="#F9DCC0" />
+    <path d="M-58 58c12 16 32 24 58 24s46-8 58-24" fill="none" stroke="#3E2B1A" stroke-width="8" stroke-linecap="round" />
+    <path d="M-88 74c-12 22-6 46 12 58 18 12 46 10 76 10s58 2 76-10c18-12 24-36 12-58" fill="#F9DCC0" />
+    <path d="M-92 72c-14 24-6 52 14 66 20 12 50 12 78 12s58 0 78-12c20-14 28-42 14-66" fill="none" stroke="#A96D38" stroke-width="10" stroke-linecap="round" />
+    <rect x="-72" y="64" width="144" height="24" rx="12" fill="#C7352A" />
+    <circle cx="0" cy="76" r="12" fill="#F7B733" stroke="#A0201A" stroke-width="6" />
   </g>
-  <circle cx="78" cy="62" r="16" fill="#FFEAD7" opacity="0.6" />
-  <circle cx="94" cy="50" r="10" fill="#FFEAD7" opacity="0.4" />
+  <circle cx="82" cy="56" r="18" fill="#FFEAD7" opacity="0.6" />
+  <circle cx="102" cy="42" r="12" fill="#FFEAD7" opacity="0.4" />
 </svg>
