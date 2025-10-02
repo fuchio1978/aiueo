@@ -640,9 +640,19 @@ function updateWordCompletionState() {
 
   if (isComplete && !state.wasWordCompleted) {
     state.wasWordCompleted = true;
+    if (wordDisplay && typeof state.currentWord === 'string') {
+      wordDisplay.textContent = state.currentWord;
+    }
+    setIllustrationFor(state.currentWord, { showCaption: true });
+    setResultText('せいかい！', true);
     playFeedbackSound(true);
   } else if (!isComplete && state.wasWordCompleted) {
     state.wasWordCompleted = false;
+    if (wordDisplay) {
+      wordDisplay.textContent = '？？';
+    }
+    setResultText('？？');
+    showIllustrationPreview();
   }
 }
 
@@ -748,10 +758,7 @@ function buildLetterCandidateSet(word) {
 function resetPrompt() {
   wordDisplay.textContent = '？？';
 
-  if (resultText) {
-    resultText.textContent = '';
-    resultText.style.color = 'var(--muted)';
-  }
+  setResultText('？？');
 }
 
 function pickRandomWord() {
@@ -938,7 +945,11 @@ function setResultText(message, isCorrect) {
   }
 
   resultText.textContent = message;
-  resultText.style.color = isCorrect ? 'var(--correct)' : 'var(--incorrect)';
+  if (typeof isCorrect === 'boolean') {
+    resultText.style.color = isCorrect ? 'var(--correct)' : 'var(--incorrect)';
+  } else {
+    resultText.style.color = 'var(--muted)';
+  }
 }
 
 function getIllustrationFor(word) {
