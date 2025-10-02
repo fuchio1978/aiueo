@@ -56,6 +56,16 @@ const state = {
   speechSupported: false,
   selectedWord: null,
   currentIllustrationSrc: null,
+  onAllSlotsFilled: null,
+};
+
+const dragDropState = {
+  initialized: false,
+  tiles: [],
+  slots: [],
+  tileHomes: new Map(),
+  activeTile: null,
+  completionNotified: false,
 };
 
 const audioState = {
@@ -99,6 +109,7 @@ function initialize() {
   createFeedbackSounds();
   buildCards();
   wireEvents();
+  initializeDragAndDrop();
   loadNewProblem();
 }
 
@@ -181,6 +192,7 @@ function loadNewProblem() {
   state.selectedWord = null;
   resetPrompt();
   showIllustrationPreview();
+  prepareDragAndDropForWord(state.currentWord);
 
   const choices = buildChoiceSet(state.currentWord, WORDS);
   cardButtons.forEach((button, index) => {
@@ -191,6 +203,299 @@ function loadNewProblem() {
     button.dataset.word = word;
     button.classList.remove('selected', 'correct', 'incorrect');
   });
+}
+
+function initializeDragAndDrop() {
+  if (dragDropState.initialized) {
+    return;
+  }
+
+  if (typeof document === 'undefined') {
+    return;
+  }
+
+  const tileElements = Array.from(
+    document.querySelectorAll('[data-hiragana-tile]'),
+  );
+  const slotElements = Array.from(document.querySelectorAll('[data-slot-index]'));
+
+  if (tileElements.length === 0 || slotElements.length === 0) {
+    return;
+  }
+
+  dragDropState.initialized = true;
+  dragDropState.tiles = tileElements;
+  dragDropState.slots = slotElements.map((element, index) => ({
+    element,
+    index,
+    expected: element.dataset.expectedChar || '',
+    isFilledCorrectly: element.dataset.filled === 'true',
+    placedTile: null,
+  }));
+
+  tileElements.forEach((tile) => {
+    dragDropState.tileHomes.set(tile, tile.parentElement || null);
+    tile.setAttribute('draggable', 'true');
+    tile.addEventListener('dragstart', onTileDragStart);
+    tile.addEventListener('dragend', onTileDragEnd);
+  });
+
+  slotElements.forEach((slot) => {
+    slot.addEventListener('dragenter', onSlotDragEnter);
+    slot.addEventListener('dragleave', onSlotDragLeave);
+    slot.addEventListener('dragover', onSlotDragOver);
+    slot.addEventListener('drop', onSlotDrop);
+  });
+}
+
+function prepareDragAndDropForWord(word) {
+  if (!dragDropState.initialized) {
+    return;
+  }
+
+  dragDropState.completionNotified = false;
+
+  dragDropState.slots.forEach((slotInfo) => {
+    const expected = word && word[slotInfo.index] ? word[slotInfo.index] : '';
+    slotInfo.expected = expected;
+    slotInfo.isFilledCorrectly = false;
+    slotInfo.placedTile = null;
+    slotInfo.element.dataset.expectedChar = expected;
+    slotInfo.element.dataset.filled = 'false';
+    slotInfo.element.classList.remove(
+      'is-active',
+      'is-correct',
+      'is-incorrect',
+    );
+  });
+
+  dragDropState.tiles.forEach((tile) => {
+    tile.classList.remove('is-dragging', 'is-correct', 'is-incorrect');
+    tile.setAttribute('draggable', 'true');
+    tile.removeAttribute('data-slot-index');
+    tile.removeAttribute('aria-grabbed');
+
+    const home = dragDropState.tileHomes.get(tile);
+    if (home && home !== tile.parentElement) {
+      home.appendChild(tile);
+    }
+  });
+}
+
+function onTileDragStart(event) {
+  const tile = event.currentTarget;
+  dragDropState.activeTile = tile;
+  tile.classList.add('is-dragging');
+
+  if (event.dataTransfer) {
+    const hiragana = getTileCharacter(tile);
+    event.dataTransfer.effectAllowed = 'move';
+    try {
+      event.dataTransfer.setData('text/plain', hiragana);
+    } catch (error) {
+      // Ignore browsers that disallow setData during dragstart
+    }
+  }
+}
+
+function onTileDragEnd(event) {
+  const tile = event.currentTarget;
+  tile.classList.remove('is-dragging');
+  dragDropState.activeTile = null;
+}
+
+function onSlotDragEnter(event) {
+  if (!dragDropState.activeTile) {
+    return;
+  }
+
+  const slotInfo = findSlotInfo(event.currentTarget);
+  if (!slotInfo || slotInfo.isFilledCorrectly) {
+    return;
+  }
+
+  event.preventDefault();
+  slotInfo.element.classList.add('is-active');
+}
+
+function onSlotDragLeave(event) {
+  const slotInfo = findSlotInfo(event.currentTarget);
+  if (!slotInfo) {
+    return;
+  }
+
+  slotInfo.element.classList.remove('is-active');
+}
+
+function onSlotDragOver(event) {
+  if (!dragDropState.activeTile) {
+    return;
+  }
+
+  const slotInfo = findSlotInfo(event.currentTarget);
+  if (!slotInfo || slotInfo.isFilledCorrectly) {
+    return;
+  }
+
+  event.preventDefault();
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move';
+  }
+}
+
+function onSlotDrop(event) {
+  const slotInfo = findSlotInfo(event.currentTarget);
+  if (!slotInfo || !dragDropState.activeTile) {
+    return;
+  }
+
+  event.preventDefault();
+  slotInfo.element.classList.remove('is-active');
+
+  const tile = dragDropState.activeTile;
+  if (slotInfo.isFilledCorrectly) {
+    playFeedbackSound(false);
+    resetTilePosition(tile);
+    return;
+  }
+
+  const expected = slotInfo.expected;
+  const character = getTileCharacter(tile);
+
+  if (!expected || character !== expected) {
+    indicateIncorrectDrop(slotInfo.element);
+    playFeedbackSound(false);
+    resetTilePosition(tile);
+    return;
+  }
+
+  placeTileInSlot(tile, slotInfo);
+  playFeedbackSound(true);
+  checkAllSlotsSolved();
+}
+
+function placeTileInSlot(tile, slotInfo) {
+  releaseTileFromCurrentSlot(tile);
+
+  slotInfo.element.classList.remove('is-incorrect');
+  slotInfo.element.classList.add('is-correct');
+  slotInfo.element.dataset.filled = 'true';
+
+  slotInfo.isFilledCorrectly = true;
+  slotInfo.placedTile = tile;
+
+  tile.classList.remove('is-incorrect');
+  tile.classList.add('is-correct');
+  tile.setAttribute('draggable', 'false');
+  tile.setAttribute('aria-grabbed', 'true');
+  tile.dataset.slotIndex = String(slotInfo.index);
+
+  slotInfo.element.appendChild(tile);
+}
+
+function releaseTileFromCurrentSlot(tile) {
+  const slotIndex = Number.parseInt(tile.dataset.slotIndex, 10);
+  if (Number.isInteger(slotIndex)) {
+    const previousSlot = dragDropState.slots.find(
+      (info) => info.index === slotIndex,
+    );
+    if (previousSlot && previousSlot.placedTile === tile) {
+      previousSlot.placedTile = null;
+      previousSlot.isFilledCorrectly = false;
+      previousSlot.element.dataset.filled = 'false';
+      previousSlot.element.classList.remove('is-correct');
+    }
+  }
+}
+
+function resetTilePosition(tile) {
+  releaseTileFromCurrentSlot(tile);
+  tile.classList.remove('is-dragging', 'is-correct');
+  tile.classList.add('is-incorrect');
+  tile.removeAttribute('aria-grabbed');
+  tile.setAttribute('draggable', 'true');
+  delete tile.dataset.slotIndex;
+
+  const home = dragDropState.tileHomes.get(tile);
+  if (home && home !== tile.parentElement) {
+    home.appendChild(tile);
+  }
+
+  scheduleAnimationFrame(() => {
+    tile.classList.remove('is-incorrect');
+  });
+}
+
+function indicateIncorrectDrop(slotElement) {
+  slotElement.classList.add('is-incorrect');
+  scheduleAnimationFrame(() => {
+    slotElement.classList.remove('is-incorrect');
+  });
+}
+
+function checkAllSlotsSolved() {
+  if (dragDropState.completionNotified) {
+    return;
+  }
+
+  const allCorrect = dragDropState.slots.every(
+    (slotInfo) => slotInfo.expected && slotInfo.isFilledCorrectly,
+  );
+
+  if (!allCorrect || dragDropState.slots.length === 0) {
+    return;
+  }
+
+  dragDropState.completionNotified = true;
+  playFeedbackSound(true);
+
+  if (typeof state.onAllSlotsFilled === 'function') {
+    try {
+      state.onAllSlotsFilled({
+        word: state.currentWord,
+        slots: dragDropState.slots.map((slot) => ({
+          index: slot.index,
+          character: slot.expected,
+        })),
+      });
+    } catch (error) {
+      console.warn('スロット完成時のハンドラでエラーが発生しました', error);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    const detail = {
+      word: state.currentWord,
+    };
+    window.dispatchEvent(
+      new CustomEvent('aiueo:all-slots-correct', { detail }),
+    );
+  }
+}
+
+function findSlotInfo(element) {
+  return dragDropState.slots.find((slot) => slot.element === element) || null;
+}
+
+function getTileCharacter(tile) {
+  if (!tile) {
+    return '';
+  }
+
+  if (tile.dataset && tile.dataset.hiragana) {
+    return tile.dataset.hiragana;
+  }
+
+  return tile.textContent ? tile.textContent.trim() : '';
+}
+
+function scheduleAnimationFrame(callback) {
+  if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+    window.requestAnimationFrame(callback);
+    return;
+  }
+
+  setTimeout(callback, 0);
 }
 
 function resetPrompt() {
@@ -565,7 +870,15 @@ function playFeedbackSound(isCorrect) {
   }
 }
 
-window.__aiueo__ = {
-  buildChoiceSet,
-  WORDS,
-};
+if (typeof window !== 'undefined') {
+  const api = window.__aiueo__ && typeof window.__aiueo__ === 'object'
+    ? window.__aiueo__
+    : {};
+  api.buildChoiceSet = buildChoiceSet;
+  api.WORDS = WORDS;
+  api.setSlotsCompleteHandler = (handler) => {
+    state.onAllSlotsFilled = typeof handler === 'function' ? handler : null;
+  };
+
+  window.__aiueo__ = api;
+}
