@@ -1,30 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
   <rect width="320" height="240" fill="#6C7AE0" rx="28" />
-  <g transform="translate(160 140)">
-    <path d="M-90-32c0-48 34-86 90-86s90 38 90 86v70c0 42-42 70-90 70s-90-28-90-70v-70z" fill="#F5F0FF" />
-    <path d="M-96-74l32-44 26 42" fill="#F5F0FF" />
-    <path d="M96-74l-32-44-26 42" fill="#F5F0FF" />
-    <g fill="#E5D7FF">
-      <ellipse cx="-58" cy="-12" rx="26" ry="30" />
-      <ellipse cx="58" cy="-12" rx="26" ry="30" />
+  <g transform="translate(160 128)">
+    <ellipse cx="0" cy="68" rx="78" ry="52" fill="#F5F0FF" />
+    <path d="M68 72c30 4 44 28 32 52-10 20-34 30-58 18" fill="none" stroke="#F5F0FF" stroke-width="18" stroke-linecap="round" />
+    <g fill="#F5F0FF">
+      <circle cx="0" cy="-6" r="62" />
+      <path d="M-48-32l-44-30 6 56z" />
+      <path d="M48-32l44-30-6 56z" />
     </g>
+    <g fill="#FFACC5">
+      <path d="M-46-34l-22-16 4 28z" />
+      <path d="M46-34l22-16-4 28z" />
+      <ellipse cx="0" cy="30" rx="28" ry="24" />
+    </g>
+    <path d="M-12 22h24" stroke="#3C3273" stroke-width="6" stroke-linecap="round" />
+    <path d="M-20 12c6-4 14-4 20 0" fill="none" stroke="#3C3273" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
     <g fill="#3C3273">
-      <circle cx="-40" cy="-12" r="8" />
-      <circle cx="40" cy="-12" r="8" />
+      <circle cx="-22" cy="-12" r="10" />
+      <circle cx="22" cy="-12" r="10" />
     </g>
-    <path d="M-16 8l16 12 16-12" fill="none" stroke="#3C3273" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
     <g stroke="#3C3273" stroke-width="5" stroke-linecap="round">
-      <path d="M-68 12h34" />
-      <path d="M-70 20h38" />
-      <path d="M68 12h-34" />
-      <path d="M70 20h-38" />
+      <path d="M-70 0h36" />
+      <path d="M-72 12h40" />
+      <path d="M70 0h-36" />
+      <path d="M72 12h-40" />
     </g>
-    <circle cx="0" cy="30" r="28" fill="#FFACC5" opacity="0.6" />
-    <path d="M-28 40c18 14 38 14 56 0" fill="none" stroke="#3C3273" stroke-width="6" stroke-linecap="round" />
-    <g fill="#3C3273">
-      <circle cx="-16" cy="22" r="4" />
-      <circle cx="16" cy="22" r="4" />
+    <path d="M-30 56c18 18 60 18 78 0" fill="none" stroke="#3C3273" stroke-width="6" stroke-linecap="round" />
+    <g fill="#F5F0FF">
+      <ellipse cx="-28" cy="44" rx="18" ry="22" />
+      <ellipse cx="28" cy="44" rx="18" ry="22" />
     </g>
+    <circle cx="0" cy="40" r="8" fill="#3C3273" />
   </g>
   <circle cx="260" cy="52" r="14" fill="#FFFFFF" opacity="0.5" />
   <circle cx="244" cy="44" r="8" fill="#FFFFFF" opacity="0.35" />
