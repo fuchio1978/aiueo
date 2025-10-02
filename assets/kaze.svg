@@ -1,6 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
-  <rect width="320" height="240" fill="#8ECAE6" rx="24" />
-  <path d="M60 120h140c15 0 28-10 28-22s-13-22-28-22" fill="none" stroke="#023047" stroke-width="12" stroke-linecap="round" />
-  <path d="M90 160h110c12 0 22-8 22-18s-10-18-22-18" fill="none" stroke="#023047" stroke-width="12" stroke-linecap="round" opacity="0.8" />
-  <text x="50%" y="80%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="52" fill="#023047">かぜ</text>
+  <rect width="320" height="240" fill="#8ECAE6" rx="28" />
+  <g fill="none" stroke="#023047" stroke-width="12" stroke-linecap="round">
+    <path d="M60 120h140c18 0 34-12 34-28s-16-28-34-28" />
+    <path d="M90 164h130c14 0 26-10 26-24s-12-24-26-24" opacity="0.85" />
+    <path d="M110 92h70c12 0 22-8 22-18s-10-18-22-18" opacity="0.6" />
+  </g>
+  <g fill="#fff" opacity="0.6">
+    <ellipse cx="98" cy="188" rx="20" ry="10" />
+    <ellipse cx="220" cy="60" rx="18" ry="12" />
+    <ellipse cx="60" cy="76" rx="16" ry="10" />
+  </g>
+  <g fill="#219EBC" opacity="0.4">
+    <circle cx="250" cy="160" r="12" />
+    <circle cx="86" cy="48" r="8" />
+  </g>
 </svg>

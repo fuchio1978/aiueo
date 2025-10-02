@@ -1,4 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
-  <rect width="320" height="240" fill="#F25C54" rx="24" />
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="64" fill="#fff">かに</text>
+  <rect width="320" height="240" fill="#F25C54" rx="28" />
+  <g transform="translate(160 150)">
+    <ellipse cx="0" cy="0" rx="94" ry="54" fill="#FF8A7A" />
+    <path d="M-92-10c-18-16-38-44-20-62 18-18 46 6 56 26" fill="#FF8A7A" />
+    <path d="M92-10c18-16 38-44 20-62-18-18-46 6-56 26" fill="#FF8A7A" />
+    <g fill="#F25C54">
+      <path d="M-110-68c-18-6-30 20-8 40 0-20 10-28 22-30" />
+      <path d="M110-68c18-6 30 20 8 40 0-20-10-28-22-30" />
+    </g>
+    <g fill="#F25C54">
+      <ellipse cx="-74" cy="30" rx="16" ry="28" />
+      <ellipse cx="74" cy="30" rx="16" ry="28" />
+    </g>
+    <g fill="#3B1813">
+      <circle cx="-28" cy="-10" r="8" />
+      <circle cx="28" cy="-10" r="8" />
+    </g>
+    <path d="M-36 20c18 12 54 12 72 0" fill="none" stroke="#3B1813" stroke-width="6" stroke-linecap="round" />
+    <g stroke="#F25C54" stroke-width="8" stroke-linecap="round">
+      <path d="M-94 6l-34-6" />
+      <path d="M-92 22l-32 12" />
+      <path d="M94 6l34-6" />
+      <path d="M92 22l32 12" />
+    </g>
+  </g>
+  <circle cx="70" cy="60" r="16" fill="#FFDAD6" opacity="0.55" />
+  <circle cx="88" cy="48" r="10" fill="#FFDAD6" opacity="0.4" />
 </svg>

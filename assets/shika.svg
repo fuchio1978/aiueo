@@ -1,4 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
-  <rect width="320" height="240" fill="#F6BD60" rx="24" />
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="64" fill="#4D331F">しか</text>
+  <rect width="320" height="240" fill="#F6BD60" rx="28" />
+  <g transform="translate(160 146)">
+    <path d="M-100-24c0-52 42-96 100-96s100 44 100 96v58c0 44-48 70-100 70s-100-26-100-70v-58z" fill="#F4D7A3" />
+    <path d="M-92-70c-16-26 12-58 32-38l40 40" fill="#F4D7A3" />
+    <path d="M92-70c16-26-12-58-32-38l-40 40" fill="#F4D7A3" />
+    <g fill="#B07D44">
+      <ellipse cx="-62" cy="-4" rx="26" ry="32" />
+      <ellipse cx="62" cy="-4" rx="26" ry="32" />
+    </g>
+    <g fill="#3F301D">
+      <circle cx="-44" cy="-6" r="7" />
+      <circle cx="44" cy="-6" r="7" />
+    </g>
+    <path d="M-24 18l24 18 24-18" fill="none" stroke="#3F301D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <g fill="#F8E3C5">
+      <ellipse cx="-24" cy="26" rx="20" ry="24" />
+      <ellipse cx="24" cy="26" rx="20" ry="24" />
+    </g>
+    <path d="M-38 42c16 12 44 12 60 0" fill="none" stroke="#3F301D" stroke-width="6" stroke-linecap="round" />
+    <ellipse cx="0" cy="34" rx="16" ry="12" fill="#3F301D" />
+    <circle cx="0" cy="36" r="5" fill="#F8E3C5" />
+    <g fill="none" stroke="#B07D44" stroke-width="8" stroke-linecap="round">
+      <path d="M-52-90l-32-24" />
+      <path d="M-46-74l-38-6" />
+      <path d="M52-90l32-24" />
+      <path d="M46-74l38-6" />
+    </g>
+  </g>
+  <circle cx="62" cy="60" r="16" fill="#FFF2DE" opacity="0.6" />
+  <circle cx="82" cy="48" r="10" fill="#FFF2DE" opacity="0.4" />
 </svg>

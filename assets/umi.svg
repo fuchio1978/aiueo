@@ -1,4 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
-  <rect width="320" height="240" fill="#4FB0C6" rx="24" />
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="64" fill="#fff">うみ</text>
+  <rect width="320" height="240" fill="#4FB0C6" rx="28" />
+  <path d="M0 150c20-14 60-34 120-34s100 20 120 34c20 14 60 34 80 34v90H-80v-90c20 0 60-20 80-34z" fill="#2C699A" opacity="0.55" />
+  <path d="M-40 162c24-16 64-28 120-28s96 12 120 28 64 28 120 28v80H-160v-80c56 0 96-12 120-28z" fill="#1D4F8A" opacity="0.4" />
+  <g fill="none" stroke="#D8F3FF" stroke-width="6" stroke-linecap="round" opacity="0.7">
+    <path d="M40 150c16 8 36 12 56 12s40-4 56-12" />
+    <path d="M80 176c18 10 46 10 64 0" />
+    <path d="M120 204c14 8 32 8 46 0" />
+  </g>
+  <g fill="#F1FAEE" opacity="0.7">
+    <circle cx="220" cy="72" r="22" />
+    <circle cx="236" cy="62" r="12" opacity="0.6" />
+  </g>
 </svg>

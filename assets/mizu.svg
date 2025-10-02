@@ -1,5 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
-  <rect width="320" height="240" fill="#48CAE4" rx="24" />
-  <path d="M160 60c30 40 60 70 60 100a60 60 0 0 1-120 0c0-30 30-60 60-100z" fill="#023E8A" opacity="0.7" />
-  <text x="50%" y="82%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="52" fill="#fff">みず</text>
+  <rect width="320" height="240" fill="#48CAE4" rx="28" />
+  <path d="M160 60c30 40 72 76 72 112a72 72 0 0 1-144 0c0-36 42-72 72-112z" fill="#0096C7" opacity="0.75" />
+  <path d="M160 76c22 32 52 60 52 92a52 52 0 0 1-104 0c0-32 30-60 52-92z" fill="#ADE8F4" opacity="0.9" />
+  <path d="M112 178c14 14 44 22 80 0" fill="none" stroke="#023E8A" stroke-width="8" stroke-linecap="round" opacity="0.6" />
+  <g fill="#ADE8F4" opacity="0.7">
+    <circle cx="82" cy="70" r="16" />
+    <circle cx="238" cy="68" r="12" />
+    <circle cx="100" cy="50" r="8" />
+  </g>
 </svg>

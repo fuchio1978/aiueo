@@ -1,6 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
-  <rect width="320" height="240" fill="#84A59D" rx="24" />
+  <rect width="320" height="240" fill="#84A59D" rx="28" />
   <polygon points="40,200 120,80 200,200" fill="#52796F" />
   <polygon points="120,200 200,90 280,200" fill="#354F52" opacity="0.85" />
-  <text x="50%" y="75%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="56" fill="#fff">やま</text>
+  <polygon points="100,200 160,110 220,200" fill="#6B9080" opacity="0.7" />
+  <path d="M120 128l16 16 20-36 18 28 18-26" fill="none" stroke="#F4F1DE" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M0 200c40-24 100-40 160-40s120 16 160 40v40H0z" fill="#52796F" opacity="0.5" />
+  <g fill="#F6BD60" opacity="0.85">
+    <circle cx="74" cy="58" r="18" />
+    <circle cx="88" cy="50" r="10" opacity="0.6" />
+  </g>
+  <g fill="#F4F1DE" opacity="0.7">
+    <circle cx="230" cy="70" r="6" />
+    <circle cx="250" cy="60" r="5" />
+    <circle cx="210" cy="56" r="4" />
+  </g>
 </svg>

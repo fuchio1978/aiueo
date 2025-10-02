@@ -1,5 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
-  <rect width="320" height="240" fill="#FFB703" rx="24" />
-  <path d="M40 180c40-40 80-60 120-60s80 20 120 60v20H40z" fill="#E9C46A" />
-  <text x="50%" y="70%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="56" fill="#8D5524">すな</text>
+  <rect width="320" height="240" fill="#FFB703" rx="28" />
+  <path d="M40 180c40-40 80-60 120-60s80 20 120 60v40H40z" fill="#F4A261" />
+  <path d="M60 188c28-30 64-44 100-44s72 14 100 44v32H60z" fill="#E9C46A" />
+  <g fill="#fff" opacity="0.45">
+    <circle cx="92" cy="112" r="6" />
+    <circle cx="124" cy="124" r="5" />
+    <circle cx="186" cy="118" r="6" />
+    <circle cx="220" cy="132" r="5" />
+    <circle cx="150" cy="136" r="5" />
+  </g>
+  <g fill="none" stroke="#C77D24" stroke-width="4" stroke-linecap="round" opacity="0.6">
+    <path d="M92 188c12-8 32-14 48-14s36 6 48 14" />
+    <path d="M110 204c8-6 24-10 38-10s30 4 38 10" />
+  </g>
+  <circle cx="246" cy="70" r="18" fill="#FFE8A1" opacity="0.7" />
+  <circle cx="260" cy="60" r="10" fill="#FFE8A1" opacity="0.4" />
 </svg>
