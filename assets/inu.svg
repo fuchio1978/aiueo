@@ -1,4 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
-  <rect width="320" height="240" fill="#C97A40" rx="24" />
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="64" fill="#fff">いぬ</text>
+  <rect width="320" height="240" fill="#C97A40" rx="28" />
+  <g transform="translate(160 144)">
+    <path d="M-92-32c0-44 32-86 92-86s92 42 92 86v62c0 42-40 70-92 70s-92-28-92-70v-62z" fill="#FFE5D0" />
+    <path d="M-94-90c-24-6-42 36-10 64" fill="#FFE5D0" />
+    <path d="M94-90c24-6 42 36 10 64" fill="#FFE5D0" />
+    <ellipse cx="-54" cy="-10" rx="26" ry="32" fill="#8C5A2B" />
+    <ellipse cx="54" cy="-10" rx="26" ry="32" fill="#8C5A2B" />
+    <g fill="#3F2F1E">
+      <circle cx="-40" cy="-12" r="8" />
+      <circle cx="40" cy="-12" r="8" />
+    </g>
+    <path d="M-16 12l16 12 16-12" fill="none" stroke="#3F2F1E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M-44 32c16 18 52 18 68 0" fill="none" stroke="#3F2F1E" stroke-width="6" stroke-linecap="round" />
+    <g fill="#F4C095">
+      <ellipse cx="-22" cy="16" rx="18" ry="22" />
+      <ellipse cx="22" cy="16" rx="18" ry="22" />
+    </g>
+    <ellipse cx="0" cy="24" rx="18" ry="14" fill="#3F2F1E" />
+    <circle cx="0" cy="30" r="6" fill="#FFE5D0" />
+  </g>
+  <circle cx="78" cy="62" r="16" fill="#FFEAD7" opacity="0.6" />
+  <circle cx="94" cy="50" r="10" fill="#FFEAD7" opacity="0.4" />
 </svg>

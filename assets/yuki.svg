@@ -1,4 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
-  <rect width="320" height="240" fill="#B5E48C" rx="24" />
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="64" fill="#1B4332">ゆき</text>
+  <rect width="320" height="240" fill="#B5E48C" rx="28" />
+  <path d="M0 192c28-22 76-38 160-38s132 16 160 38v48H0z" fill="#99D98C" opacity="0.6" />
+  <g transform="translate(160 150)">
+    <circle cx="0" cy="60" r="50" fill="#FFFFFF" opacity="0.95" />
+    <circle cx="0" cy="0" r="38" fill="#FFFFFF" opacity="0.95" />
+    <circle cx="0" cy="-48" r="26" fill="#FFFFFF" opacity="0.95" />
+    <g fill="#1B4332">
+      <circle cx="-10" cy="-56" r="4" />
+      <circle cx="10" cy="-56" r="4" />
+      <circle cx="0" cy="-40" r="4" />
+      <circle cx="0" cy="-26" r="4" />
+      <circle cx="0" cy="-12" r="4" />
+      <circle cx="0" cy="4" r="4" />
+      <circle cx="0" cy="18" r="4" />
+      <circle cx="0" cy="34" r="4" />
+    </g>
+    <path d="M-32-10l-36-20" fill="none" stroke="#E36414" stroke-width="8" stroke-linecap="round" />
+    <path d="M32-10l36-20" fill="none" stroke="#E36414" stroke-width="8" stroke-linecap="round" />
+    <path d="M-12-58c8-4 16-4 24 0" fill="none" stroke="#1B4332" stroke-width="4" stroke-linecap="round" />
+    <path d="M0-48l18 8-18 8z" fill="#FF6B6B" />
+  </g>
+  <g fill="#FFFFFF" opacity="0.7">
+    <circle cx="60" cy="60" r="8" />
+    <circle cx="90" cy="48" r="6" />
+    <circle cx="240" cy="70" r="8" />
+    <circle cx="210" cy="50" r="5" />
+    <circle cx="120" cy="80" r="6" />
+    <circle cx="260" cy="90" r="6" />
+  </g>
 </svg>

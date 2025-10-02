@@ -1,4 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
-  <rect width="320" height="240" fill="#F18FB0" rx="24" />
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Noto Sans JP, sans-serif" font-size="64" fill="#fff">さけ</text>
+  <rect width="320" height="240" fill="#F18FB0" rx="28" />
+  <g transform="translate(160 140)">
+    <path d="M-120-14c34-38 92-60 120-60s86 22 120 60c-34 38-92 60-120 60s-86-22-120-60z" fill="#FFD5DD" />
+    <path d="M-80-14c24-26 64-40 80-40s56 14 80 40c-24 26-64 40-80 40s-56-14-80-40z" fill="#FFB3C1" />
+    <path d="M-36-8c12-12 28-18 36-18s24 6 36 18c-12 12-28 18-36 18s-24-6-36-18z" fill="#F46AA3" />
+    <g fill="#253237">
+      <circle cx="-62" cy="-6" r="6" />
+      <circle cx="62" cy="-6" r="6" />
+    </g>
+    <path d="M-90-22l-30-20c-8-6-20 6-12 14l26 26" fill="#FFD5DD" />
+    <path d="M90-22l30-20c8-6 20 6 12 14l-26 26" fill="#FFD5DD" />
+    <path d="M-86 26l-28 20c-8 6 4 20 12 14l30-20" fill="#FFD5DD" />
+    <path d="M86 26l28 20c8 6-4 20-12 14l-30-20" fill="#FFD5DD" />
+  </g>
+  <circle cx="78" cy="60" r="16" fill="#FFE6EE" opacity="0.6" />
+  <circle cx="96" cy="50" r="10" fill="#FFE6EE" opacity="0.4" />
 </svg>
