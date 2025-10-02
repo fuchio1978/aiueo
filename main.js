@@ -66,6 +66,7 @@ const state = {
   speechSupported: false,
   selectedWord: null,
   currentIllustrationSrc: null,
+  audioEnabledForTiles: true,
 };
 
 const audioState = {
@@ -93,6 +94,8 @@ const dropSlotsContainer = document.getElementById('drop-slots');
 const speakButton = document.getElementById('speak-btn');
 const speechNotice = document.getElementById('speech-notice');
 const newProblemButton = document.getElementById('new-problem-btn');
+const tileAudioToggleButton = document.getElementById('toggle-tile-audio-btn');
+const tileAudioStatusText = document.getElementById('tile-audio-status');
 
 const illustrationContainer = illustration
   ? illustration.closest('.illustration')
@@ -211,6 +214,14 @@ function wireEvents() {
     });
   }
 
+  if (tileAudioToggleButton) {
+    updateTileAudioToggleUI();
+    tileAudioToggleButton.addEventListener('click', () => {
+      state.audioEnabledForTiles = !state.audioEnabledForTiles;
+      updateTileAudioToggleUI();
+    });
+  }
+
   if (newProblemButton) {
     newProblemButton.addEventListener('click', loadNewProblem);
   }
@@ -232,6 +243,33 @@ function updateSpeechSupportUI() {
     speakButton.removeAttribute('title');
     if (speechNotice) {
       speechNotice.hidden = false;
+    }
+  }
+
+  updateTileAudioToggleUI();
+}
+
+function updateTileAudioToggleUI() {
+  if (!tileAudioToggleButton) {
+    return;
+  }
+
+  const enabled = Boolean(state.audioEnabledForTiles);
+  const pressed = state.speechSupported && enabled;
+  tileAudioToggleButton.disabled = !state.speechSupported;
+  tileAudioToggleButton.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+
+  if (!state.speechSupported) {
+    tileAudioToggleButton.title = '音声が利用できません';
+  } else {
+    tileAudioToggleButton.removeAttribute('title');
+  }
+
+  if (tileAudioStatusText) {
+    if (!state.speechSupported) {
+      tileAudioStatusText.textContent = '利用不可';
+    } else {
+      tileAudioStatusText.textContent = enabled ? 'オン' : 'オフ';
     }
   }
 }
@@ -347,7 +385,7 @@ function onCardClick(event) {
     return;
   }
 
-  if (state.speechSupported) {
+  if (state.speechSupported && state.audioEnabledForTiles) {
     speakWord(selectedWord);
   }
 
