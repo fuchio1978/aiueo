@@ -230,6 +230,33 @@ function wireEvents() {
     });
   }
 
+  if (illustration && state.speechSupported) {
+    const speakFromIllustration = () => {
+      if (!(state.speechSupported && state.audioEnabledForTiles)) {
+        return;
+      }
+
+      const targetWord = state.currentWord || state.selectedWord;
+      if (!targetWord) {
+        return;
+      }
+
+      speakWord(targetWord);
+    };
+
+    illustration.addEventListener('click', speakFromIllustration);
+    illustration.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        speakFromIllustration();
+      }
+    });
+
+    if (!illustration.hasAttribute('tabindex')) {
+      illustration.setAttribute('tabindex', '0');
+    }
+  }
+
   if (tileAudioToggleButton) {
     updateTileAudioToggleUI();
     tileAudioToggleButton.addEventListener('click', () => {
