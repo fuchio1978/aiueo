@@ -67,6 +67,7 @@ const state = {
   selectedWord: null,
   currentIllustrationSrc: null,
   audioEnabledForTiles: true,
+  wasWordCompleted: false,
 };
 
 const audioState = {
@@ -205,12 +206,12 @@ function renderDropSlots() {
   dropSlotElements.slice(0, DROP_SLOT_COUNT).forEach((slot, index) => {
     slot.dataset.slotIndex = String(index);
     slot.setAttribute('role', 'listitem');
-    slot.setAttribute('aria-label', `${index + 1}文字目のスロット`);
     slot.setAttribute('aria-roledescription', '文字カードのドロップ先');
     slot.setAttribute('aria-dropeffect', 'move');
     slot.textContent = '？';
     slot.dataset.letter = '';
-    slot.classList.remove('is-drop-target', 'is-filled');
+    slot.classList.remove('is-drop-target', 'is-filled', 'is-correct', 'is-incorrect');
+    updateSlotAriaLabel(slot, index, '？', null);
   });
 
   initializeDragAndDrop();
@@ -296,6 +297,7 @@ function loadNewProblem() {
   state.currentWord = pickRandomWord();
 
   state.selectedWord = null;
+  state.wasWordCompleted = false;
   resetPrompt();
   showIllustrationPreview();
   renderDropSlots();
@@ -473,9 +475,14 @@ function fillDropSlot(slot, letter) {
     slot.textContent = value;
     slot.dataset.letter = value;
     slot.classList.add('is-filled');
-    const index = Number(slot.dataset.slotIndex || 0);
-    const position = Number.isNaN(index) ? '' : `${index + 1}`;
-    slot.setAttribute('aria-label', `${position}文字目のスロット（${value}）`);
+    const slotIndex = getSlotIndex(slot);
+    const expectedLetter = getExpectedLetterForSlot(slotIndex);
+    const hasExpectedLetter = expectedLetter !== '';
+    const isCorrect = hasExpectedLetter && expectedLetter === value;
+    applySlotFeedback(slot, hasExpectedLetter, isCorrect);
+    updateSlotAriaLabel(slot, slotIndex, value, hasExpectedLetter ? isCorrect : null);
+    playFeedbackSound(isCorrect);
+    updateWordCompletionState();
   });
 }
 
@@ -487,11 +494,101 @@ function clearDropSlot(slot) {
   scheduleAnimationFrame(() => {
     slot.textContent = '？';
     slot.dataset.letter = '';
-    slot.classList.remove('is-filled');
-    const index = Number(slot.dataset.slotIndex || 0);
-    const position = Number.isNaN(index) ? '' : `${index + 1}`;
-    slot.setAttribute('aria-label', `${position}文字目のスロット`);
+    slot.classList.remove('is-filled', 'is-correct', 'is-incorrect');
+    const slotIndex = getSlotIndex(slot);
+    updateSlotAriaLabel(slot, slotIndex, '？', null);
+    updateWordCompletionState();
   });
+}
+
+function getSlotIndex(slot) {
+  if (!slot) {
+    return -1;
+  }
+
+  const index = Number(slot.dataset.slotIndex);
+  return Number.isNaN(index) ? -1 : index;
+}
+
+function getExpectedLetterForSlot(index) {
+  if (typeof state.currentWord !== 'string') {
+    return '';
+  }
+
+  if (typeof index !== 'number' || Number.isNaN(index) || index < 0) {
+    return '';
+  }
+
+  return state.currentWord.charAt(index) || '';
+}
+
+function applySlotFeedback(slot, hasExpectedLetter, isCorrect) {
+  if (!slot || !slot.classList) {
+    return;
+  }
+
+  slot.classList.remove('is-correct', 'is-incorrect');
+
+  if (!slot.classList.contains('is-filled') || !hasExpectedLetter) {
+    return;
+  }
+
+  slot.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
+}
+
+function updateSlotAriaLabel(slot, slotIndex, value, isCorrect) {
+  if (!slot) {
+    return;
+  }
+
+  const index =
+    typeof slotIndex === 'number' && !Number.isNaN(slotIndex) && slotIndex >= 0
+      ? slotIndex
+      : getSlotIndex(slot);
+  const positionText = index >= 0 ? `${index + 1}文字目のスロット` : '文字スロット';
+  const displayValue = value && value !== '' ? value : '？';
+  let statusText = '';
+
+  if (displayValue !== '？' && typeof isCorrect === 'boolean') {
+    statusText = isCorrect ? ' - せいかい' : ' - ちがうよ';
+  }
+
+  slot.setAttribute('aria-label', `${positionText}（${displayValue}）${statusText}`.trim());
+}
+
+function checkAllSlotsCorrect() {
+  if (typeof state.currentWord !== 'string' || state.currentWord.length === 0) {
+    return false;
+  }
+
+  for (let i = 0; i < state.currentWord.length; i += 1) {
+    const slot = dropSlotElements[i];
+    if (!slot) {
+      return false;
+    }
+
+    const slotLetter = typeof slot.dataset.letter === 'string' ? slot.dataset.letter : '';
+    if (slotLetter !== state.currentWord.charAt(i)) {
+      return false;
+    }
+  }
+
+  const extraFilled = dropSlotElements
+    .slice(state.currentWord.length)
+    .some((slot) => slot && typeof slot.dataset.letter === 'string' && slot.dataset.letter !== '');
+
+  return !extraFilled;
+}
+
+function updateWordCompletionState() {
+  const isComplete = checkAllSlotsCorrect();
+
+  if (isComplete && !state.wasWordCompleted) {
+    state.wasWordCompleted = true;
+    playFeedbackSound(true);
+  } else if (!isComplete && state.wasWordCompleted) {
+    state.wasWordCompleted = false;
+  }
 }
 
 function setDropTarget(target) {

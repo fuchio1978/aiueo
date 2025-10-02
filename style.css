@@ -232,6 +232,20 @@ button {
   color: var(--text);
 }
 
+.drop-slot.is-correct {
+  border-color: var(--correct);
+  border-style: solid;
+  background: rgba(46, 125, 50, 0.16);
+  color: var(--correct);
+}
+
+.drop-slot.is-incorrect {
+  border-color: var(--incorrect);
+  border-style: solid;
+  background: rgba(198, 40, 40, 0.15);
+  color: var(--incorrect);
+}
+
 .choice-card {
   list-style: none;
   border: 2px solid transparent;
