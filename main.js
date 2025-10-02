@@ -177,6 +177,8 @@ function buildLetterTiles() {
     tile.setAttribute('aria-roledescription', 'ドラッグできるひらがなカード');
     tile.setAttribute('aria-grabbed', 'false');
     tile.textContent = '';
+    tile.addEventListener('click', handleTileClick);
+    tile.addEventListener('keydown', handleTileSpeechKeyDown);
     letterPool.appendChild(tile);
     return tile;
   });
@@ -349,6 +351,32 @@ function initializeDragAndDrop() {
   letterPool.addEventListener('dragover', handleDropTargetOver);
   letterPool.addEventListener('dragleave', handleDropTargetLeave);
   letterPool.addEventListener('drop', handleDropOnPool);
+}
+
+function handleTileClick(event) {
+  const tile = event.currentTarget;
+  if (!tile) {
+    return;
+  }
+
+  const letter = (tile.dataset.letter || tile.textContent || '').trim();
+  if (letter === '') {
+    return;
+  }
+
+  if (!(state.speechSupported && state.audioEnabledForTiles)) {
+    return;
+  }
+
+  speakWord(letter);
+}
+
+function handleTileSpeechKeyDown(event) {
+  if (event.key !== 'Enter' && event.key !== ' ') {
+    return;
+  }
+
+  handleTileClick(event);
 }
 
 function handleTileDragStart(event) {
