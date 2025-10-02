@@ -58,6 +58,19 @@ const state = {
   currentIllustrationSrc: null,
 };
 
+const audioState = {
+  context: null,
+  buffers: {
+    correct: null,
+    incorrect: null,
+  },
+};
+
+const FEEDBACK_VOLUME = {
+  default: 0.45,
+  withSpeech: 0.2,
+};
+
 const wordDisplay = document.getElementById('word-display');
 const illustration = document.getElementById('word-illustration');
 const caption = document.getElementById('illustration-caption');
@@ -83,6 +96,7 @@ function initialize() {
   }
 
   state.speechSupported = detectSpeechSupport();
+  createFeedbackSounds();
   buildCards();
   wireEvents();
   loadNewProblem();
@@ -239,6 +253,7 @@ function onCardClick(event) {
   button.classList.add('selected');
 
   const isCorrect = selectedWord === state.currentWord;
+  playFeedbackSound(isCorrect);
   if (isCorrect) {
     button.classList.add('correct');
     setResultText('せいかい！', true);
@@ -397,6 +412,157 @@ function speakWord(text) {
 
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utterance);
+}
+
+function createFeedbackSounds() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const AudioContextImpl = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextImpl) {
+    return;
+  }
+
+  if (audioState.context) {
+    return;
+  }
+
+  try {
+    const context = new AudioContextImpl();
+    audioState.context = context;
+    audioState.buffers.correct = createToneBuffer(context, {
+      duration: 0.28,
+      attack: 0.01,
+      release: 0.09,
+      amplitude: 0.7,
+      partials: [
+        { frequency: 660, endFrequency: 990, amplitude: 1 },
+        { frequency: 990, endFrequency: 1320, amplitude: 0.3 },
+      ],
+    });
+    audioState.buffers.incorrect = createToneBuffer(context, {
+      duration: 0.32,
+      attack: 0.01,
+      release: 0.12,
+      amplitude: 0.7,
+      partials: [
+        { frequency: 240, endFrequency: 160, amplitude: 1 },
+        { frequency: 480, endFrequency: 220, amplitude: 0.35 },
+      ],
+    });
+  } catch (error) {
+    console.warn('フィードバックサウンドの初期化に失敗しました', error);
+    audioState.context = null;
+    audioState.buffers.correct = null;
+    audioState.buffers.incorrect = null;
+  }
+}
+
+function createToneBuffer(context, options = {}) {
+  const {
+    duration = 0.25,
+    attack = 0.01,
+    release = 0.1,
+    amplitude = 0.5,
+    partials = [],
+  } = options;
+
+  const effectivePartials =
+    partials.length > 0
+      ? partials
+      : [
+          {
+            frequency: options.frequency || 440,
+            endFrequency:
+              typeof options.endFrequency === 'number'
+                ? options.endFrequency
+                : options.frequency || 440,
+            amplitude: 1,
+          },
+        ];
+
+  const sampleRate = context.sampleRate;
+  const frameCount = Math.max(1, Math.floor(sampleRate * duration));
+  const buffer = context.createBuffer(1, frameCount, sampleRate);
+  const data = buffer.getChannelData(0);
+  const phases = new Array(effectivePartials.length).fill(0);
+
+  for (let i = 0; i < frameCount; i += 1) {
+    const t = i / sampleRate;
+    const progress = frameCount > 1 ? i / (frameCount - 1) : 0;
+    const envelope = computeEnvelope(t, duration, attack, release);
+    let sampleValue = 0;
+
+    effectivePartials.forEach((partial, index) => {
+      const startFrequency = partial.frequency;
+      const endFrequency =
+        typeof partial.endFrequency === 'number' ? partial.endFrequency : startFrequency;
+      const frequency = startFrequency + (endFrequency - startFrequency) * progress;
+      const increment = (2 * Math.PI * frequency) / sampleRate;
+      phases[index] += increment;
+      const partialAmplitude = typeof partial.amplitude === 'number' ? partial.amplitude : 1;
+      sampleValue += Math.sin(phases[index]) * partialAmplitude;
+    });
+
+    const normalized = sampleValue / effectivePartials.length;
+    data[i] = normalized * envelope * amplitude;
+  }
+
+  return buffer;
+}
+
+function computeEnvelope(time, duration, attack, release) {
+  const attackDuration = Math.max(0, Math.min(attack, duration));
+  const releaseDuration = Math.max(0, Math.min(release, duration));
+  const sustainStart = attackDuration;
+  const releaseStart = Math.max(duration - releaseDuration, sustainStart);
+
+  if (attackDuration > 0 && time < attackDuration) {
+    return time / attackDuration;
+  }
+
+  if (time >= releaseStart && releaseDuration > 0) {
+    return Math.max(0, (duration - time) / releaseDuration);
+  }
+
+  return 1;
+}
+
+function playFeedbackSound(isCorrect) {
+  const key = isCorrect ? 'correct' : 'incorrect';
+  const { context, buffers } = audioState;
+
+  if (!context || !buffers[key]) {
+    return;
+  }
+
+  try {
+    if (context.state === 'suspended') {
+      context.resume();
+    }
+
+    const bufferSource = context.createBufferSource();
+    bufferSource.buffer = buffers[key];
+
+    const gainNode = context.createGain();
+    const shouldReduceVolume =
+      state.speechSupported &&
+      typeof window !== 'undefined' &&
+      window.speechSynthesis &&
+      typeof window.speechSynthesis === 'object' &&
+      window.speechSynthesis.speaking;
+
+    gainNode.gain.value = shouldReduceVolume
+      ? FEEDBACK_VOLUME.withSpeech
+      : FEEDBACK_VOLUME.default;
+
+    bufferSource.connect(gainNode);
+    gainNode.connect(context.destination);
+    bufferSource.start();
+  } catch (error) {
+    console.warn('フィードバックサウンドの再生に失敗しました', error);
+  }
 }
 
 window.__aiueo__ = {
