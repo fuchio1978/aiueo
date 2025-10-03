@@ -18,5 +18,30 @@
 2. DevTools の Console を確認します。
 3. `All assertions passed.` と表示され、`Assertion failed` が出なければテスト成功です。
 
+## デプロイ方法
+このアプリはビルド工程のない静的サイトなので、静的ファイルを公開できる任意のホスティングサービスにそのまま配置できます。代表的なデプロイ方法を以下にまとめます。
+
+### GitHub Pages を使う
+1. GitHub にリポジトリを作成し、このプロジェクトのファイルを push します。
+2. GitHub のリポジトリ設定画面で **Pages** を開き、`Source` を `Deploy from a branch` に設定します。
+3. 公開したいブランチ（通常は `main` または `master`）とフォルダーに `/(root)` を選び、**Save** します。
+4. 数十秒〜数分待つと公開用 URL（`https://<ユーザー名>.github.io/<リポジトリ名>/`）が発行されます。ブラウザでアクセスし、表示を確認してください。
+
+### Netlify を使う
+1. [Netlify](https://www.netlify.com/) にサインアップし、ダッシュボードを開きます。
+2. **Add new site** → **Deploy manually** を選び、`index.html` や `assets/` を含むフォルダーをドラッグ＆ドロップします。
+3. アップロードが完了すると一意の URL が割り当てられます。必要に応じてカスタムドメインを設定してください。
+
+### Vercel を使う
+1. [Vercel](https://vercel.com/) にサインアップし、**New Project** をクリックします。
+2. GitHub/GitLab/Bitbucket のリポジトリをインポートするか、**Deploy** → **Import Git Repository** でこのプロジェクトを選択します。
+3. `Framework Preset` は **Other** を選択し、`Output Directory` に `.`（ドット）を指定します。
+4. **Deploy** を押すとデプロイが始まり、完了後に公開 URL が表示されます。
+
+### 追加のヒント
+- ファイルを手動でアップロードできる静的ホスティング（S3 + CloudFront、Firebase Hosting など）でも同様に公開できます。
+- `index.html` がサイトのエントリーポイントなので、ホスティング側で `index.html` をデフォルトドキュメントに設定してください。
+- HTTPS 対応やカスタムドメイン設定は、利用するホスティングサービスのガイドに従ってください。
+
 ## ライセンス
 このプロジェクトは学習目的のサンプルです。必要に応じて自由に改変して利用してください。
