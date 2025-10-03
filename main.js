@@ -111,7 +111,14 @@ const dragDropState = {
   dropTarget: null,
   animationFrame: null,
   scheduledCallbacks: [],
+  pointerId: null,
+  pointerStart: { x: 0, y: 0 },
+  pointerHasMoved: false,
+  pointerOverPool: false,
 };
+
+const POINTER_MOVE_THRESHOLD = 6;
+const TOUCH_LISTENER_OPTIONS = { passive: false };
 
 initialize();
 
@@ -348,14 +355,42 @@ function initializeDragAndDrop() {
     return;
   }
 
+  const supportsPointerEvents =
+    typeof window !== 'undefined' && typeof window.PointerEvent === 'function';
+  const supportsTouchEvents =
+    !supportsPointerEvents &&
+    typeof window !== 'undefined' &&
+    ('ontouchstart' in window ||
+      (typeof navigator !== 'undefined' && Number(navigator.maxTouchPoints) > 0));
+
   letterTiles.forEach((tile) => {
     tile.removeEventListener('dragstart', handleTileDragStart);
     tile.removeEventListener('dragend', handleTileDragEnd);
     tile.removeEventListener('keydown', handleTileKeyDown);
+    tile.removeEventListener('pointerdown', handleTilePointerDown);
+    tile.removeEventListener('pointermove', handleTilePointerMove);
+    tile.removeEventListener('pointerup', handleTilePointerUp);
+    tile.removeEventListener('pointercancel', handleTilePointerCancel);
+    tile.removeEventListener('touchstart', handleTileTouchStart, TOUCH_LISTENER_OPTIONS);
+    tile.removeEventListener('touchmove', handleTileTouchMove, TOUCH_LISTENER_OPTIONS);
+    tile.removeEventListener('touchend', handleTileTouchEnd, TOUCH_LISTENER_OPTIONS);
+    tile.removeEventListener('touchcancel', handleTileTouchCancel, TOUCH_LISTENER_OPTIONS);
 
     tile.addEventListener('dragstart', handleTileDragStart);
     tile.addEventListener('dragend', handleTileDragEnd);
     tile.addEventListener('keydown', handleTileKeyDown);
+
+    if (supportsPointerEvents) {
+      tile.addEventListener('pointerdown', handleTilePointerDown);
+      tile.addEventListener('pointermove', handleTilePointerMove);
+      tile.addEventListener('pointerup', handleTilePointerUp);
+      tile.addEventListener('pointercancel', handleTilePointerCancel);
+    } else if (supportsTouchEvents) {
+      tile.addEventListener('touchstart', handleTileTouchStart, TOUCH_LISTENER_OPTIONS);
+      tile.addEventListener('touchmove', handleTileTouchMove, TOUCH_LISTENER_OPTIONS);
+      tile.addEventListener('touchend', handleTileTouchEnd, TOUCH_LISTENER_OPTIONS);
+      tile.addEventListener('touchcancel', handleTileTouchCancel, TOUCH_LISTENER_OPTIONS);
+    }
   });
 
   const dropTargets = [...dropSlotElements];
@@ -513,6 +548,285 @@ function handleTileKeyDown(event) {
       fillDropSlot(emptySlot, tile.dataset.letter || tile.textContent || '');
     }
   }
+}
+
+function handleTilePointerDown(event) {
+  if (!event || !event.currentTarget) {
+    return;
+  }
+
+  if (event.pointerType === 'mouse') {
+    return;
+  }
+
+  const tile = event.currentTarget;
+  if (!beginActivePointerDrag(tile, event.clientX, event.clientY)) {
+    return;
+  }
+
+  dragDropState.pointerId = event.pointerId;
+  if (typeof tile.setPointerCapture === 'function') {
+    try {
+      tile.setPointerCapture(event.pointerId);
+    } catch (error) {
+      console.warn('Failed to set pointer capture', error);
+    }
+  }
+
+  event.preventDefault();
+}
+
+function handleTilePointerMove(event) {
+  if (event.pointerType === 'mouse') {
+    return;
+  }
+
+  if (!dragDropState.activeTile || dragDropState.pointerId !== event.pointerId) {
+    return;
+  }
+
+  event.preventDefault();
+  updateActivePointerDrag(event.clientX, event.clientY);
+}
+
+function handleTilePointerUp(event) {
+  if (event.pointerType === 'mouse') {
+    return;
+  }
+
+  if (!dragDropState.activeTile || dragDropState.pointerId !== event.pointerId) {
+    return;
+  }
+
+  if (typeof dragDropState.activeTile.releasePointerCapture === 'function') {
+    try {
+      dragDropState.activeTile.releasePointerCapture(event.pointerId);
+    } catch (error) {
+      console.warn('Failed to release pointer capture', error);
+    }
+  }
+
+  event.preventDefault();
+  finalizeActivePointerDrag({ clientX: event.clientX, clientY: event.clientY });
+}
+
+function handleTilePointerCancel(event) {
+  if (event.pointerType === 'mouse') {
+    return;
+  }
+
+  if (!dragDropState.activeTile || dragDropState.pointerId !== event.pointerId) {
+    return;
+  }
+
+  if (typeof dragDropState.activeTile.releasePointerCapture === 'function') {
+    try {
+      dragDropState.activeTile.releasePointerCapture(event.pointerId);
+    } catch (error) {
+      console.warn('Failed to release pointer capture', error);
+    }
+  }
+
+  finalizeActivePointerDrag({ cancel: true });
+}
+
+function handleTileTouchStart(event) {
+  if (!event || !event.currentTarget) {
+    return;
+  }
+
+  const tile = event.currentTarget;
+  if (!event.changedTouches || event.changedTouches.length === 0) {
+    return;
+  }
+
+  const touch = event.changedTouches[0];
+  if (!beginActivePointerDrag(tile, touch.clientX, touch.clientY)) {
+    return;
+  }
+
+  dragDropState.pointerId = touch.identifier;
+  event.preventDefault();
+}
+
+function handleTileTouchMove(event) {
+  if (!dragDropState.activeTile) {
+    return;
+  }
+
+  const identifier = dragDropState.pointerId;
+  if (typeof identifier !== 'number') {
+    return;
+  }
+
+  const touch =
+    getTouchByIdentifier(event.changedTouches, identifier) ||
+    getTouchByIdentifier(event.touches, identifier);
+
+  if (!touch) {
+    return;
+  }
+
+  event.preventDefault();
+  updateActivePointerDrag(touch.clientX, touch.clientY);
+}
+
+function handleTileTouchEnd(event) {
+  if (!dragDropState.activeTile) {
+    return;
+  }
+
+  const identifier = dragDropState.pointerId;
+  if (typeof identifier !== 'number') {
+    return;
+  }
+
+  const touch = getTouchByIdentifier(event.changedTouches, identifier);
+  if (!touch) {
+    return;
+  }
+
+  event.preventDefault();
+  finalizeActivePointerDrag({ clientX: touch.clientX, clientY: touch.clientY });
+}
+
+function handleTileTouchCancel(event) {
+  if (!dragDropState.activeTile) {
+    return;
+  }
+
+  const identifier = dragDropState.pointerId;
+  if (typeof identifier !== 'number') {
+    return;
+  }
+
+  const touch = getTouchByIdentifier(event.changedTouches, identifier);
+  if (!touch) {
+    return;
+  }
+
+  finalizeActivePointerDrag({ cancel: true });
+}
+
+function beginActivePointerDrag(tile, clientX, clientY) {
+  if (!tile || tile.dataset.letter === '') {
+    return false;
+  }
+
+  if (dragDropState.activeTile && dragDropState.activeTile !== tile) {
+    finalizeActivePointerDrag({ cancel: true });
+  }
+
+  dragDropState.activeTile = tile;
+  dragDropState.pointerStart = {
+    x: typeof clientX === 'number' ? clientX : 0,
+    y: typeof clientY === 'number' ? clientY : 0,
+  };
+  dragDropState.pointerHasMoved = false;
+  dragDropState.pointerOverPool = false;
+  tile.classList.add('is-dragging');
+  tile.setAttribute('aria-grabbed', 'true');
+
+  if (typeof clientX === 'number' && typeof clientY === 'number') {
+    updateDropTargetFromPoint(clientX, clientY);
+  } else {
+    setDropTarget(null);
+  }
+
+  return true;
+}
+
+function updateActivePointerDrag(clientX, clientY) {
+  if (!dragDropState.activeTile) {
+    return;
+  }
+
+  if (typeof clientX === 'number' && typeof clientY === 'number') {
+    if (!dragDropState.pointerHasMoved) {
+      const deltaX = Math.abs(clientX - dragDropState.pointerStart.x);
+      const deltaY = Math.abs(clientY - dragDropState.pointerStart.y);
+      if (deltaX >= POINTER_MOVE_THRESHOLD || deltaY >= POINTER_MOVE_THRESHOLD) {
+        dragDropState.pointerHasMoved = true;
+      }
+    }
+
+    updateDropTargetFromPoint(clientX, clientY);
+  }
+}
+
+function finalizeActivePointerDrag(options = {}) {
+  const tile = dragDropState.activeTile;
+  if (!tile) {
+    return;
+  }
+
+  const { cancel = false } = options;
+
+  if (typeof options.clientX === 'number' && typeof options.clientY === 'number') {
+    updateDropTargetFromPoint(options.clientX, options.clientY);
+  }
+
+  const dropTarget = dragDropState.dropTarget;
+  const overPool = dragDropState.pointerOverPool;
+  const hasMoved = dragDropState.pointerHasMoved;
+  const letter = tile.dataset.letter || tile.textContent || '';
+
+  if (!cancel && letter !== '') {
+    if (dropTarget) {
+      fillDropSlot(dropTarget, letter);
+    } else if (overPool && hasMoved) {
+      // Dropped back into the pool: do nothing.
+    } else if (!hasMoved) {
+      const emptySlot = dropSlotElements.find((slot) => !slot.classList.contains('is-filled'));
+      if (emptySlot) {
+        fillDropSlot(emptySlot, letter);
+      }
+    }
+  }
+
+  handleTileDragEnd({ currentTarget: tile });
+  dragDropState.pointerId = null;
+  dragDropState.pointerOverPool = false;
+  dragDropState.pointerHasMoved = false;
+  dragDropState.pointerStart = { x: 0, y: 0 };
+}
+
+function updateDropTargetFromPoint(clientX, clientY) {
+  if (typeof document === 'undefined') {
+    return;
+  }
+
+  const element = document.elementFromPoint(clientX, clientY);
+  if (!element) {
+    dragDropState.pointerOverPool = false;
+    setDropTarget(null);
+    return;
+  }
+
+  if (letterPool && (element === letterPool || letterPool.contains(element))) {
+    dragDropState.pointerOverPool = true;
+    setDropTarget(null);
+    return;
+  }
+
+  dragDropState.pointerOverPool = false;
+  const slot = element.closest ? element.closest('.drop-slot') : null;
+  setDropTarget(slot || null);
+}
+
+function getTouchByIdentifier(touchList, identifier) {
+  if (!touchList || typeof touchList.length !== 'number') {
+    return null;
+  }
+
+  for (let index = 0; index < touchList.length; index += 1) {
+    const touch = touchList.item ? touchList.item(index) : touchList[index];
+    if (touch && touch.identifier === identifier) {
+      return touch;
+    }
+  }
+
+  return null;
 }
 
 function fillDropSlot(slot, letter) {
