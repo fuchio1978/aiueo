@@ -140,7 +140,7 @@ button {
 }
 
 .card-grid {
-  display: grid;
+  display: none;
   gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
 }
@@ -153,6 +153,10 @@ button {
   border-radius: 20px;
   background-color: rgba(255, 255, 255, 0.85);
   box-shadow: 0 16px 36px rgba(46, 61, 123, 0.12);
+}
+
+.choices .letter-play-area {
+  margin-top: 0;
 }
 
 .letter-pool {
