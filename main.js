@@ -108,6 +108,11 @@ const audioState = {
   },
 };
 
+const FEEDBACK_CLIP_SOURCES = {
+  correct: 'assets/audio/correct.mp3',
+  incorrect: 'assets/audio/incorrect.mp3',
+};
+
 const FEEDBACK_VOLUME = {
   default: 0.45,
   withSpeech: 0.2,
@@ -1345,7 +1350,62 @@ function createFeedbackSounds() {
   try {
     const context = new AudioContextImpl();
     audioState.context = context;
-    audioState.buffers.correct = createToneBuffer(context, {
+
+    const fallbackBuffers = createFallbackFeedbackBuffers(context);
+    audioState.buffers.correct = fallbackBuffers.correct;
+    audioState.buffers.incorrect = fallbackBuffers.incorrect;
+
+    const isFileProtocol =
+      typeof window.location === 'object' && window.location?.protocol === 'file:';
+    const fetchUnavailable = typeof fetch !== 'function';
+
+    if (isFileProtocol || fetchUnavailable) {
+      if (isFileProtocol) {
+        console.info(
+          'プリロード済みの効果音は file: プロトコルでは使用できないため、合成音にフォールバックします。'
+        );
+      }
+      return;
+    }
+
+    const clipPromises = Object.entries(FEEDBACK_CLIP_SOURCES).map(
+      ([key, url]) =>
+        fetch(url)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Failed to load feedback clip: ${url}`);
+            }
+            return response.arrayBuffer();
+          })
+          .then((arrayBuffer) => decodeAudioData(context, arrayBuffer))
+          .then((buffer) => ({ key, buffer }))
+    );
+
+    Promise.all(clipPromises)
+      .then((results) => {
+        results.forEach(({ key, buffer }) => {
+          audioState.buffers[key] = buffer;
+        });
+      })
+      .catch((error) => {
+        console.warn(
+          'プリロード済みのフィードバックサウンドを読み込めなかったため、合成音にフォールバックします',
+          error
+        );
+        audioState.buffers.correct = fallbackBuffers.correct;
+        audioState.buffers.incorrect = fallbackBuffers.incorrect;
+      });
+  } catch (error) {
+    console.warn('フィードバックサウンドの初期化に失敗しました', error);
+    audioState.context = null;
+    audioState.buffers.correct = null;
+    audioState.buffers.incorrect = null;
+  }
+}
+
+function createFallbackFeedbackBuffers(context) {
+  return {
+    correct: createToneBuffer(context, {
       duration: 0.28,
       attack: 0.01,
       release: 0.09,
@@ -1354,8 +1414,8 @@ function createFeedbackSounds() {
         { frequency: 660, endFrequency: 990, amplitude: 1 },
         { frequency: 990, endFrequency: 1320, amplitude: 0.3 },
       ],
-    });
-    audioState.buffers.incorrect = createToneBuffer(context, {
+    }),
+    incorrect: createToneBuffer(context, {
       duration: 0.32,
       attack: 0.01,
       release: 0.12,
@@ -1364,13 +1424,40 @@ function createFeedbackSounds() {
         { frequency: 240, endFrequency: 160, amplitude: 1 },
         { frequency: 480, endFrequency: 220, amplitude: 0.35 },
       ],
-    });
-  } catch (error) {
-    console.warn('フィードバックサウンドの初期化に失敗しました', error);
-    audioState.context = null;
-    audioState.buffers.correct = null;
-    audioState.buffers.incorrect = null;
-  }
+    }),
+  };
+}
+
+function decodeAudioData(context, arrayBuffer) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+
+    const resolveOnce = (value) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      resolve(value);
+    };
+
+    const rejectOnce = (error) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      reject(error);
+    };
+
+    const decodePromise = context.decodeAudioData(
+      arrayBuffer,
+      (buffer) => resolveOnce(buffer),
+      (error) => rejectOnce(error)
+    );
+
+    if (decodePromise && typeof decodePromise.then === 'function') {
+      decodePromise.then(resolveOnce).catch(rejectOnce);
+    }
+  });
 }
 
 function createToneBuffer(context, options = {}) {
