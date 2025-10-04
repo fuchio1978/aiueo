@@ -98,6 +98,7 @@ const state = {
   currentIllustrationSrc: null,
   audioEnabledForTiles: true,
   wasWordCompleted: false,
+  nextProblemTimeoutId: null,
 };
 
 const audioState = {
@@ -383,7 +384,48 @@ function updateTileAudioToggleUI() {
   }
 }
 
+function clearScheduledNextProblem() {
+  if (state.nextProblemTimeoutId == null) {
+    return;
+  }
+
+  const cancelTimer =
+    (typeof window !== 'undefined' && typeof window.clearTimeout === 'function'
+      ? window.clearTimeout
+      : typeof clearTimeout === 'function'
+      ? clearTimeout
+      : null);
+
+  if (cancelTimer) {
+    cancelTimer(state.nextProblemTimeoutId);
+  }
+
+  state.nextProblemTimeoutId = null;
+}
+
+function scheduleNextProblemTransition() {
+  const createTimer =
+    (typeof window !== 'undefined' && typeof window.setTimeout === 'function'
+      ? window.setTimeout
+      : typeof setTimeout === 'function'
+      ? setTimeout
+      : null);
+
+  if (!createTimer) {
+    return;
+  }
+
+  clearScheduledNextProblem();
+
+  state.nextProblemTimeoutId = createTimer(() => {
+    state.nextProblemTimeoutId = null;
+    loadNewProblem();
+  }, 1000);
+}
+
 function loadNewProblem() {
+  clearScheduledNextProblem();
+
   if (WORDS.length < REQUIRED_CARDS) {
     console.error('十分な単語データがありません');
     return;
@@ -1021,6 +1063,7 @@ function updateWordCompletionState() {
     showCelebrationOverlay();
     setResultText('大正解！', true);
     playCelebrationSound();
+    scheduleNextProblemTransition();
   } else if (!isComplete && state.wasWordCompleted) {
     state.wasWordCompleted = false;
     if (wordDisplay) {
@@ -1029,6 +1072,7 @@ function updateWordCompletionState() {
     setResultText('？？');
     hideCelebrationOverlay();
     showIllustrationPreview();
+    clearScheduledNextProblem();
   }
 }
 
@@ -1192,6 +1236,7 @@ function onCardClick(event) {
   if (isCorrect) {
     button.classList.add('correct');
     setResultText('せいかい！', true);
+    scheduleNextProblemTransition();
   } else {
     button.classList.add('incorrect');
     setResultText('ちがうよ', false);
