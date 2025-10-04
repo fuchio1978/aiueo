@@ -29,7 +29,7 @@ const PLACEHOLDER_IMAGE = {
 
 const WORD_IMAGE_MAP = {
   ねこ: 'neko',
-  いぬ: 'inu.png',
+  いぬ: 'inu',
   くま: 'kuma',
   さる: 'saru',
   かに: 'kani',
@@ -50,10 +50,10 @@ const WORD_IMAGE_MAP = {
   すな: 'suna',
 };
 
-const INLINE_IMAGE_DATA = {
-  'inu.png':
-    `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAEU0lEQVR42u3cPYoVQRSGYZczsbGJWxBMDF2FYGYomLgEA7cg6A5cg2Ak5gYaKh1caS79U9V1/usdOAgi5ZnvPLfsabv60Z/fv/5S89YjQgAAQQCAAgAFAAoAFAAoAFAAoAAQsj6+fkZ/swBYwmwt+isEoCdYj6Cj95cWwEiwFkFH7y81gNbgPr176RJy9P5SAzgL9Ky0Q47eX2oAI8G2Bl25v9QAJMPVCDl6f6kBaIQrGXL0/lID0AxXIuTo/ZUEIBnuUcgV+ksNwCrcqyFH7w8AAMgLwDrc3pCj9wcAAOQFYHFlPXLFHb2/kgAswm39lEXvDwAAyAvAc3tt2Waj9wcAAABAK+Dvn98CAAAAKH0BeBTyHoAo/bEDsAMAAAAAAEBWAKMPVGoHnKE/dgB2AAAAoCAA7/9tOwMQoT8AAAAAACgMwOOZux4A3v0BAAD1AVg+d38FgGd/5Z8JtD55cz/8W0Xsb4qHQi3P3o0CsO5vSgBap2+lAFj2N8W5AIvz92fDt0IQ8RUyYQFIvYFDC4B2f1OdDewNfHSNreGPIJDub7rDodalCSDbG8RCvSDCe/gREJR/P4B3wNEBLH9/eQBeIbcMP0J/ZQF4htwz/Aj9TQHAKuQrw/fubxoA2iGPDN+zv3IAPEKWGL5nf1MBkA5Zcvhe/U0HQCJojcF79TctgCtBWwzeur8yAKRD3/r95Wv59fHDQ9d6P79+aPpzretLYwRA43BuX8uA1rUMeLSO1tf+3gDQMXwNBC3rA8AJwG0AR8MZQdCzPgAMAdwP6DakveGMAuhZHwCKAI4GdFajAHrXB4AggNHhXEEgtT4ABgBofkK1dwApCOkBaA0/G4CoCMLtAJ4DslqffwIEht8zpJH7AFrrA0Bg+C1DkrgTqLU+AASGvzUsyfW01weAMIBsNT2A3sB+fHkfeqBX+psWQEuYreU1bKn+AHAAWA8IGv2VBrCFQCNcCwSa/U31SJhWuEchv3r+pLk8+psGgHa4eyGPALDo7x7BNAA0wr0PuWf49wgs+isPYI3AavhnCF48ffhfHsPfQjDF0TAAAMAs3HXIvQCs+ysPYCnrT//RLrAHwLO/pcq/IMI74CMA3kDLvyFkvQt4AbjVGoDVj6Zn/ZV/RxAAAGAe7jrk9dD3yrM/dgDn4XshmGoH8NgFMgDwmAMAAOADYCnLgHuGfyvL/rxmMA2A9Q7w7dWb3fLaAaYEYIXg/se+VgBWCDzznxLAHoKt+wIASI7g6ObPDcLWBaDVDSHv7EMA0EKw9+zd2dW/1V3BCLmHASCNoPUhz6OhayKIknkoAFIIoj8VHCnvcABGEUQ/FxAt65AArkCIfjIoasahAew9RZTpbGD0bFMA2IIQvbJkmgpABgjZskwJICKErBmmBuCNoUJuZQBYgKiYU1kAPVBm/v6nBzB7AQAAhAAACgAUACgAUACgAEABgAIABQAKABQAKABQAKAAQNWrf3INX0I5RqgEAAAAAElFTkSuQmCC`,
-};
+const WORDS_WITH_PNG = new Set([
+  // ここにPNGで提供されている単語を追加します。
+]);
+
 const REQUIRED_CARDS = 5;
 const LETTER_TILE_COUNT = 5;
 const DROP_SLOT_COUNT = 2;
@@ -1278,14 +1278,16 @@ function getIllustrationFor(word) {
 
   if (typeof WORD_IMAGE_MAP !== 'undefined' && WORD_IMAGE_MAP[word]) {
     const mappedValue = WORD_IMAGE_MAP[word];
-    if (INLINE_IMAGE_DATA[mappedValue]) {
-      return INLINE_IMAGE_DATA[mappedValue];
+    if (mappedValue.includes('.')) {
+      return `assets/${mappedValue}`;
     }
-    const hasExtension = mappedValue.includes('.');
-    return `assets/${mappedValue}${hasExtension ? '' : '.svg'}`;
+
+    const extension = WORDS_WITH_PNG.has(word) ? '.png' : '.svg';
+    return `assets/${mappedValue}${extension}`;
   }
 
-  return `assets/${word}.svg`;
+  const extension = WORDS_WITH_PNG.has(word) ? '.png' : '.svg';
+  return `assets/${word}${extension}`;
 }
 
 function speakWord(text) {
