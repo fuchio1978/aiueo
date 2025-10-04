@@ -82,6 +82,7 @@ const WORDS_WITH_PNG = new Set([
 const REQUIRED_CARDS = 5;
 const LETTER_TILE_COUNT = 5;
 const DROP_SLOT_COUNT = 2;
+const NEXT_PROBLEM_TRANSITION_DELAY_MS = 2000;
 const UNIQUE_LETTERS = Array.from(
   new Set(
     WORDS.reduce((acc, word) => {
@@ -420,7 +421,7 @@ function scheduleNextProblemTransition() {
   state.nextProblemTimeoutId = createTimer(() => {
     state.nextProblemTimeoutId = null;
     loadNewProblem();
-  }, 1000);
+  }, NEXT_PROBLEM_TRANSITION_DELAY_MS);
 }
 
 function loadNewProblem() {
