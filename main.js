@@ -105,12 +105,14 @@ const audioState = {
   buffers: {
     correct: null,
     incorrect: null,
+    celebration: null,
   },
 };
 
 const FEEDBACK_CLIP_SOURCES = {
   correct: 'assets/audio/correct.mp3',
   incorrect: 'assets/audio/incorrect.mp3',
+  celebration: 'assets/audio/daiseikai.mp3',
 };
 
 const FEEDBACK_VOLUME = {
@@ -132,6 +134,7 @@ const speechNotice = document.getElementById('speech-notice');
 const newProblemButton = document.getElementById('new-problem-btn');
 const tileAudioToggleButton = document.getElementById('toggle-tile-audio-btn');
 const tileAudioStatusText = document.getElementById('tile-audio-status');
+const celebrationOverlay = document.getElementById('celebration-overlay');
 
 const illustrationContainer = illustration
   ? illustration.closest('.illustration')
@@ -140,6 +143,7 @@ const illustrationContainer = illustration
 let cardButtons = [];
 let letterTiles = [];
 let dropSlotElements = [];
+let celebrationAudioElement = null;
 
 const dragDropState = {
   activeTile: null,
@@ -169,6 +173,26 @@ function initialize() {
   buildLetterTiles();
   wireEvents();
   loadNewProblem();
+}
+
+function setCelebrationOverlayActive(isActive) {
+  const active = Boolean(isActive);
+
+  if (celebrationOverlay) {
+    celebrationOverlay.hidden = !active;
+  }
+
+  if (illustrationContainer) {
+    illustrationContainer.dataset.celebrate = active ? 'true' : 'false';
+  }
+}
+
+function showCelebrationOverlay() {
+  setCelebrationOverlayActive(true);
+}
+
+function hideCelebrationOverlay() {
+  setCelebrationOverlayActive(false);
 }
 
 function detectSpeechSupport() {
@@ -369,6 +393,7 @@ function loadNewProblem() {
 
   state.selectedWord = null;
   state.wasWordCompleted = false;
+  hideCelebrationOverlay();
   resetPrompt();
   showIllustrationPreview();
   renderDropSlots();
@@ -993,14 +1018,16 @@ function updateWordCompletionState() {
       wordDisplay.textContent = state.currentWord;
     }
     setIllustrationFor(state.currentWord, { showCaption: true });
-    setResultText('せいかい！', true);
-    playFeedbackSound(true);
+    showCelebrationOverlay();
+    setResultText('大正解！', true);
+    playCelebrationSound();
   } else if (!isComplete && state.wasWordCompleted) {
     state.wasWordCompleted = false;
     if (wordDisplay) {
       wordDisplay.textContent = '？？';
     }
     setResultText('？？');
+    hideCelebrationOverlay();
     showIllustrationPreview();
   }
 }
@@ -1187,6 +1214,8 @@ function revealCurrentWord() {
 }
 
 function showIllustrationPreview() {
+  hideCelebrationOverlay();
+
   if (!state.currentWord) {
     setIllustrationFor(null, { showCaption: true });
     return;
@@ -1354,6 +1383,7 @@ function createFeedbackSounds() {
     const fallbackBuffers = createFallbackFeedbackBuffers(context);
     audioState.buffers.correct = fallbackBuffers.correct;
     audioState.buffers.incorrect = fallbackBuffers.incorrect;
+    audioState.buffers.celebration = null;
 
     const isFileProtocol =
       typeof window.location === 'object' && window.location?.protocol === 'file:';
@@ -1365,6 +1395,7 @@ function createFeedbackSounds() {
           'プリロード済みの効果音は file: プロトコルでは使用できないため、合成音にフォールバックします。'
         );
       }
+      audioState.buffers.celebration = null;
       return;
     }
 
@@ -1394,12 +1425,14 @@ function createFeedbackSounds() {
         );
         audioState.buffers.correct = fallbackBuffers.correct;
         audioState.buffers.incorrect = fallbackBuffers.incorrect;
+        audioState.buffers.celebration = null;
       });
   } catch (error) {
     console.warn('フィードバックサウンドの初期化に失敗しました', error);
     audioState.context = null;
     audioState.buffers.correct = null;
     audioState.buffers.incorrect = null;
+    audioState.buffers.celebration = null;
   }
 }
 
@@ -1528,6 +1561,53 @@ function computeEnvelope(time, duration, attack, release) {
   }
 
   return 1;
+}
+
+function playCelebrationSound() {
+  const { context, buffers } = audioState;
+  const clipUrl = FEEDBACK_CLIP_SOURCES.celebration;
+
+  if (context && buffers.celebration) {
+    try {
+      if (context.state === 'suspended') {
+        context.resume();
+      }
+
+      const bufferSource = context.createBufferSource();
+      bufferSource.buffer = buffers.celebration;
+
+      const gainNode = context.createGain();
+      gainNode.gain.value = FEEDBACK_VOLUME.default;
+
+      bufferSource.connect(gainNode);
+      gainNode.connect(context.destination);
+      bufferSource.start();
+      return;
+    } catch (error) {
+      console.warn('お祝いサウンドの再生に失敗しました', error);
+    }
+  }
+
+  if (typeof Audio === 'function' && typeof clipUrl === 'string') {
+    if (!celebrationAudioElement) {
+      celebrationAudioElement = new Audio(clipUrl);
+    } else if (celebrationAudioElement.src !== clipUrl) {
+      celebrationAudioElement.src = clipUrl;
+    }
+
+    try {
+      celebrationAudioElement.currentTime = 0;
+      const playPromise = celebrationAudioElement.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {});
+      }
+    } catch (error) {
+      console.warn('お祝いサウンドの再生に失敗しました', error);
+    }
+    return;
+  }
+
+  playFeedbackSound(true);
 }
 
 function playFeedbackSound(isCorrect) {
