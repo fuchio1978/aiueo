@@ -13,6 +13,11 @@
 - ブラウザが Web Speech API (`speechSynthesis`) に対応していない場合、読み上げボタンは自動的に無効化され「音声は未対応です」という通知が表示されます。
 - 強制的に音声機能を無効化して確認したい場合は、`index.html?nospeech=1` を開いてください。読み上げボタンが無効化され、通知が表示されれば仕様どおりです。
 
+### フィードバックサウンド（正解・不正解の効果音）
+- 正解・不正解の効果音は事前に録音した音声クリップを `assets/audio/correct.mp3` と `assets/audio/incorrect.mp3` から読み込みます。
+- `file:` プロトコルで直接 `index.html` を開いた場合や、ブラウザが同ファイルへの `fetch` をブロックした場合は、従来どおり Web Audio API で生成したシンセサイザー音に自動でフォールバックします。
+- 録音済みの効果音を確実に再生したい場合は、`index.html` を HTTP/HTTPS でホストしてください（GitHub Pages・Netlify・Vercel など）。
+
 ## テスト
 1. `test.html` をブラウザで開きます。
 2. DevTools の Console を確認します。
