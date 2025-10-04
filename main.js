@@ -91,6 +91,8 @@ const UNIQUE_LETTERS = Array.from(
   )
 );
 
+const NEXT_PROBLEM_TRANSITION_DELAY_MS = 2000;
+
 const state = {
   currentWord: null,
   speechSupported: false,
@@ -420,7 +422,7 @@ function scheduleNextProblemTransition() {
   state.nextProblemTimeoutId = createTimer(() => {
     state.nextProblemTimeoutId = null;
     loadNewProblem();
-  }, 2000);
+  }, NEXT_PROBLEM_TRANSITION_DELAY_MS);
 }
 
 function loadNewProblem() {
