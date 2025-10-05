@@ -89,6 +89,11 @@ button {
   border-radius: 24px;
   background-color: #fff;
   box-shadow: 0 20px 40px rgba(43, 58, 101, 0.1);
+  transition: opacity 0.25s ease;
+}
+
+.illustration[data-preview='true'] #word-illustration {
+  opacity: 0.82;
 }
 
 .illustration-overlay {
