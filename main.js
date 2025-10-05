@@ -1325,7 +1325,7 @@ function showIllustrationPreview(word = state.currentWord) {
     return;
   }
 
-  setIllustrationFor(word, { showCaption: false });
+  setIllustrationFor(null, { showCaption: true });
 }
 
 function normalizeIllustrationOptions(options) {
