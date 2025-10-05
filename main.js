@@ -486,17 +486,21 @@ function loadNewProblem() {
     return;
   }
 
-  state.currentWord = pickRandomWord();
+  const nextWord = pickRandomWord();
 
   state.selectedWord = null;
   state.wasWordCompleted = false;
   hideCelebrationOverlay();
   resetPrompt();
-  showIllustrationPreview();
-  renderDropSlots();
-  renderLetterCandidates(state.currentWord);
+  setIllustrationFor(null, { showCaption: true });
 
-  const choices = buildChoiceSet(state.currentWord, WORDS);
+  state.currentWord = nextWord;
+
+  showIllustrationPreview(nextWord);
+  renderDropSlots();
+  renderLetterCandidates(nextWord);
+
+  const choices = buildChoiceSet(nextWord, WORDS);
   cardButtons.forEach((button, index) => {
     const choice = choices[index];
     const word =
@@ -1313,15 +1317,15 @@ function revealCurrentWord() {
   setIllustrationFor(state.currentWord, { showCaption: true });
 }
 
-function showIllustrationPreview() {
+function showIllustrationPreview(word = state.currentWord) {
   hideCelebrationOverlay();
 
-  if (!state.currentWord) {
+  if (!word) {
     setIllustrationFor(null, { showCaption: true });
     return;
   }
 
-  setIllustrationFor(state.currentWord, { showCaption: false });
+  setIllustrationFor(word, { showCaption: false });
 }
 
 function normalizeIllustrationOptions(options) {
