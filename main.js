@@ -146,6 +146,8 @@ const UNIQUE_LETTERS = Array.from(
   )
 );
 
+const NEXT_PROBLEM_TRANSITION_DELAY_MS = 2000;
+
 const state = {
   currentWord: null,
   speechSupported: false,
